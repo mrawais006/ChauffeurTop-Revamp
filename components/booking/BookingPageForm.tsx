@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Calendar, Clock, Plane, User, Mail, Phone, Info, ArrowRightLeft, Briefcase, Car, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -434,7 +433,7 @@ export function BookingPageForm() {
                         {/* Service Type Dropdown */}
                         <div className="space-y-1.5">
                             <label className="text-xs text-white/50 ml-1">Service Type *</label>
-                            <Select
+                            <select
                                 name="service_type"
                                 value={serviceType}
                                 onChange={(e) => setServiceType(e.target.value)}
@@ -449,13 +448,13 @@ export function BookingPageForm() {
                                 <option value="corporate" className="bg-luxury-black">Corporate Service</option>
                                 <option value="winery" className="bg-luxury-black">Winery Tours</option>
                                 <option value="one-day-tour" className="bg-luxury-black">One Day Tours</option>
-                            </Select>
+                            </select>
                         </div>
 
                         {/* Vehicle Selection Dropdown */}
                         <div className="space-y-1.5">
                             <label className="text-xs text-white/50 ml-1">Select Vehicle *</label>
-                            <Select
+                            <select
                                 name="vehicle"
                                 value={selectedVehicle}
                                 onChange={(e) => setSelectedVehicle(e.target.value)}
@@ -467,7 +466,7 @@ export function BookingPageForm() {
                                 <option value="people-mover" className="bg-luxury-black">People Mover - 7 passengers</option>
                                 <option value="eco-friendly" className="bg-luxury-black">Eco-Friendly - 3 passengers</option>
                                 <option value="premium-sedan" className="bg-luxury-black">Premium Sedan - 3 passengers</option>
-                            </Select>
+                            </select>
                         </div>
 
                         {/* Selected Vehicle Card Preview */}
@@ -587,7 +586,7 @@ export function BookingPageForm() {
                             <div className="space-y-1.5">
                                 <label className="text-xs text-white/50 ml-1">Time *</label>
                                 <div className="flex gap-2">
-                                    <Select style={{ width: "90px" }}
+                                    <select style={{ width: "90px" }}
                                         value={timeHour}
                                         onChange={(e) => setTimeHour(e.target.value)}
                                         className="h-12 flex-1 min-w-[140px] bg-white/5 border-white/10 text-white text-sm text-center focus:border-luxury-gold rounded-lg"
@@ -596,8 +595,8 @@ export function BookingPageForm() {
                                         {Array.from({ length: 12 }, (_, i) => i + 1).map((h) => (
                                             <option key={h} value={h} className="bg-luxury-black text-white">{h}</option>
                                         ))}
-                                    </Select>
-                                    <Select style={{ width: "90px" }}
+                                    </select>
+                                    <select style={{ width: "90px" }}
                                         value={timeMinute}
                                         onChange={(e) => setTimeMinute(e.target.value)}
                                         disabled={!timeHour}
@@ -607,8 +606,8 @@ export function BookingPageForm() {
                                         {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map((m) => (
                                             <option key={m} value={m} className="bg-luxury-black text-white">{m}</option>
                                         ))}
-                                    </Select>
-                                    <Select style={{ width: "90px" }}
+                                    </select>
+                                    <select style={{ width: "90px" }}
                                         value={timeAmPm}
                                         onChange={(e) => setTimeAmPm(e.target.value)}
                                         disabled={!timeHour}
@@ -617,7 +616,7 @@ export function BookingPageForm() {
                                         <option value="" disabled className="bg-luxury-black text-white/50">AM/PM</option>
                                         <option className="bg-luxury-black text-white" value="AM">AM</option>
                                         <option className="bg-luxury-black text-white" value="PM">PM</option>
-                                    </Select>
+                                    </select>
                                 </div>
                             </div>
                             <div className="space-y-1.5">
@@ -720,7 +719,7 @@ export function BookingPageForm() {
                                             <div className="space-y-1.5">
                                                 <label className="text-sm font-bold text-white ml-1">Return Time *</label>
                                                 <div className="flex gap-2">
-                                                    <Select
+                                                    <select
                                                         style={{ width: "90px" }}
                                                         value={returnTimeHour}
                                                         onChange={(e) => setReturnTimeHour(e.target.value)}
@@ -730,8 +729,8 @@ export function BookingPageForm() {
                                                         {Array.from({ length: 12 }, (_, i) => i + 1).map((h) => (
                                                             <option key={h} value={h} className="bg-luxury-black text-white">{h}</option>
                                                         ))}
-                                                    </Select>
-                                                    <Select
+                                                    </select>
+                                                    <select
                                                         style={{ width: "90px" }}
                                                         value={returnTimeMinute}
                                                         onChange={(e) => setReturnTimeMinute(e.target.value)}
@@ -742,8 +741,8 @@ export function BookingPageForm() {
                                                         {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map((m) => (
                                                             <option key={m} value={m} className="bg-luxury-black text-white">{m}</option>
                                                         ))}
-                                                    </Select>
-                                                    <Select
+                                                    </select>
+                                                    <select
                                                         style={{ width: "90px" }}
                                                         value={returnTimeAmPm}
                                                         onChange={(e) => setReturnTimeAmPm(e.target.value)}
@@ -753,7 +752,7 @@ export function BookingPageForm() {
                                                         <option value="" disabled className="bg-luxury-black text-white/50">AM/PM</option>
                                                         <option className="bg-luxury-black text-white" value="AM">AM</option>
                                                         <option className="bg-luxury-black text-white" value="PM">PM</option>
-                                                    </Select>
+                                                    </select>
                                                 </div>
                                             </div>
                                         </div>
@@ -946,3 +945,4 @@ export function BookingPageForm() {
         </motion.div >
     );
 }
+

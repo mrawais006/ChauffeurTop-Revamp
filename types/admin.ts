@@ -34,15 +34,17 @@ export interface Quote {
   last_follow_up_at?: string | null;
   trip_leg?: 'one-way' | 'outbound' | 'return' | null;
   related_booking_id?: string | null;
+  confirmation_token?: string | null;
 }
 
-export type QuoteStatus = 
-  | 'pending' 
-  | 'contacted' 
-  | 'quoted' 
-  | 'confirmed' 
-  | 'completed' 
-  | 'cancelled';
+export type QuoteStatus =
+  | 'pending'
+  | 'contacted'
+  | 'quoted'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled'
+  | 'lost';
 
 export type ContactStatus = 'pending' | 'contacted' | 'resolved' | 'spam';
 

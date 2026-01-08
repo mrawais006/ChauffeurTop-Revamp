@@ -19,6 +19,8 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
         return 'bg-gray-100 text-gray-800 border-gray-300';
       case 'cancelled':
         return 'bg-red-100 text-red-800 border-red-300';
+      case 'lost':
+        return 'bg-orange-100 text-orange-800 border-orange-300';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300';
     }

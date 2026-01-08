@@ -20,7 +20,7 @@ const safeFormatDate = (dateStr: string, formatStr: string, timezone?: string): 
   try {
     const date = new Date(dateStr);
     if (!isValid(date)) return 'Invalid Date';
-    
+
     // If timezone provided, convert from UTC to that timezone
     if (timezone) {
       return formatInTimeZone(date, timezone, formatStr);
@@ -40,13 +40,13 @@ interface QuoteRowProps {
   onQuoteUpdate?: (quoteId: string, updates: Partial<Quote>) => void;
 }
 
-function QuoteRow({ 
-  quote, 
+function QuoteRow({
+  quote,
   index,
-  onViewDetails, 
+  onViewDetails,
   onDelete,
-  showReminder = false, 
-  onQuoteUpdate 
+  showReminder = false,
+  onQuoteUpdate
 }: QuoteRowProps) {
   const [showReminderDialog, setShowReminderDialog] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -66,26 +66,26 @@ function QuoteRow({
       // If melbourne_datetime exists, use it with proper timezone conversion
       if (quote.melbourne_datetime) {
         return safeFormatDate(
-          quote.melbourne_datetime, 
-          "MMMM do, yyyy 'at' HH:mm", 
+          quote.melbourne_datetime,
+          "MMMM do, yyyy 'at' HH:mm",
           MELBOURNE_TIMEZONE
         );
       }
-      
+
       // Fallback: If only date and time fields exist, combine them
       if (quote.date && quote.time) {
         // Combine date and time into ISO format
         const dateStr = quote.date.includes('T') ? quote.date.split('T')[0] : quote.date;
         const timeStr = quote.time.substring(0, 8); // HH:mm:ss
         const combinedDateTime = `${dateStr}T${timeStr}Z`; // Assume UTC
-        
+
         return safeFormatDate(
           combinedDateTime,
           "MMMM do, yyyy 'at' HH:mm",
           MELBOURNE_TIMEZONE
         );
       }
-      
+
       return 'TBD';
     } catch (error) {
       console.error('Error formatting service date:', error);
@@ -96,17 +96,17 @@ function QuoteRow({
   const handleStatusChange = async (newStatus: string) => {
     setIsUpdating(true);
     const previousStatus = quote.status;
-    
+
     try {
       // Optimistically update in parent state immediately
       if (onQuoteUpdate) {
         onQuoteUpdate(quote.id, { status: newStatus as any });
       }
-      
+
       // Save to database in background
       await updateQuoteStatus(quote.id, newStatus);
       toast.success('Status updated successfully');
-      
+
     } catch (error) {
       // Revert on error
       if (onQuoteUpdate) {
@@ -231,7 +231,7 @@ function QuoteRow({
             onValueChange={handleStatusChange}
             disabled={isUpdating}
           >
-            <SelectTrigger 
+            <SelectTrigger
               className={`w-[140px] border-2 font-bold text-base px-4 py-2 ${getStatusColor(quote.status)}`}
             >
               <SelectValue className="font-bold">
@@ -277,7 +277,13 @@ function QuoteRow({
           open={showReminderDialog}
           onOpenChange={setShowReminderDialog}
           booking={quote}
-          onSuccess={onQuoteUpdate}
+          onSuccess={() => {
+            // Update the quote with new reminder data
+            onQuoteUpdate(quote.id, {
+              reminder_count: (quote.reminder_count || 0) + 1,
+              last_reminder_sent: new Date().toISOString()
+            });
+          }}
         />
       )}
     </>
@@ -289,24 +295,24 @@ function QuoteRow({
 export default memo(QuoteRow, (prevProps, nextProps) => {
   // Re-render if quote ID changed (shouldn't happen but be safe)
   if (prevProps.quote.id !== nextProps.quote.id) return false;
-  
+
   // Re-render if status changed
   if (prevProps.quote.status !== nextProps.quote.status) return false;
-  
+
   // Re-render if quoted price changed
   if (prevProps.quote.quoted_price !== nextProps.quote.quoted_price) return false;
-  
+
   // Re-render if follow-up data changed
   if (prevProps.quote.follow_up_count !== nextProps.quote.follow_up_count) return false;
   if (prevProps.quote.last_follow_up_at !== nextProps.quote.last_follow_up_at) return false;
-  
+
   // Re-render if any key fields changed
   if (prevProps.quote.name !== nextProps.quote.name) return false;
   if (prevProps.quote.email !== nextProps.quote.email) return false;
   if (prevProps.quote.phone !== nextProps.quote.phone) return false;
-  
+
   // Re-render if showReminder prop changed
   if (prevProps.showReminder !== nextProps.showReminder) return false;
-  
+
   return true; // Props are equal, skip re-render
 });
