@@ -22,6 +22,9 @@ import { Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
+// Force dynamic rendering - don't pre-render this page at build time
+export const dynamic = 'force-dynamic';
+
 export default function AdminPage() {
   const { user, signOut } = useAuth(true);
   const [allQuotes, setAllQuotes] = useState<Quote[]>([]);
@@ -43,14 +46,14 @@ export default function AdminPage() {
     // Poll every 30 seconds for new quotes and contacts
     const pollInterval = setInterval(async () => {
       console.log('🔄 [Background Poll] Silently checking for new data...');
-      
+
       try {
         // Fetch latest data silently
         const [latestQuotes, latestContacts] = await Promise.all([
           fetchQuotes(),
           fetchContacts()
         ]);
-        
+
         // Process quotes
         const processedQuotes = latestQuotes.map(quote => {
           if (!quote.timezone) {
@@ -62,11 +65,11 @@ export default function AdminPage() {
           }
           return quote;
         });
-        
+
         // Check if there are new quotes
         const currentIds = new Set(allQuotes.map(q => q.id));
         const newQuotes = processedQuotes.filter(q => !currentIds.has(q.id));
-        
+
         if (newQuotes.length > 0) {
           console.log(`✨ [Background Poll] Found ${newQuotes.length} new quote(s)!`);
           toast.success(`${newQuotes.length} new quote(s) received!`, {
@@ -74,18 +77,18 @@ export default function AdminPage() {
             duration: 4000
           });
         }
-        
+
         // Update state silently (this won't change the active tab)
         setAllQuotes(processedQuotes);
         setContacts(latestContacts);
-        
+
         console.log('✅ [Background Poll] Data updated silently');
       } catch (error) {
         console.error('❌ [Background Poll] Error:', error);
         // Silently fail - don't show error to user
       }
     }, 10000); // Every 30 seconds
-    
+
     return () => clearInterval(pollInterval);
   }, [allQuotes]); // Depend on allQuotes to check for new items
 
@@ -93,15 +96,15 @@ export default function AdminPage() {
   // DISABLED - Using polling instead (see auto-refresh above)
   useEffect(() => {
     const USE_REALTIME = false; // Set to true if you enable Realtime on Supabase
-    
+
     if (!USE_REALTIME) {
       console.log('ℹ️ [Info] Realtime disabled - using 15-second auto-refresh instead');
       return; // Skip Realtime setup
     }
-    
+
     // Realtime code below (only runs if USE_REALTIME = true)
     console.log('🔌 [Realtime] Setting up live subscriptions...');
-    
+
     // Subscribe to quotes table changes
     const quotesSubscription = supabase
       .channel('quotes-changes')
@@ -116,9 +119,9 @@ export default function AdminPage() {
           console.log('🎉 [Realtime] New quote INSERT event received!');
           console.log('📦 [Realtime] Payload:', payload);
           console.log('📝 [Realtime] New quote data:', payload.new);
-          
+
           const newQuote = payload.new as Quote;
-          
+
           // Process the new quote (add timezone info if missing)
           if (!newQuote.timezone) {
             newQuote.timezone = 'Australia/Melbourne';
@@ -127,7 +130,7 @@ export default function AdminPage() {
             const dateStr = new Date(newQuote.date).toISOString().split('T')[0];
             newQuote.melbourne_datetime = `${dateStr}T${newQuote.time}`;
           }
-          
+
           // Add the new quote to the top of the list
           setAllQuotes(prevQuotes => {
             console.log('📊 [State Update] Previous quote count:', prevQuotes.length);
@@ -136,12 +139,12 @@ export default function AdminPage() {
             console.log('📊 [State Update] New quote count:', updated.length);
             return updated;
           });
-          
+
           // Show a toast notification
           toast.success(`New quote from ${newQuote.name}! 🎉`, {
             description: `${newQuote.service_type || 'Quote'} - ${newQuote.vehicle_type}`
           });
-          
+
           console.log('✅ [Realtime] Quote added to state successfully!');
         }
       )
@@ -156,12 +159,12 @@ export default function AdminPage() {
           console.log('🔄 [Realtime] Quote UPDATE event received!');
           console.log('📦 [Realtime] Update payload:', payload);
           console.log('📝 [Realtime] Updated quote data:', payload.new);
-          
+
           const updatedQuote = payload.new as Quote;
           console.log('🆔 [Realtime] Updating quote ID:', updatedQuote.id);
           console.log('💰 [Realtime] New quoted_price:', updatedQuote.quoted_price);
           console.log('📊 [Realtime] New status:', updatedQuote.status);
-          
+
           // Process the updated quote
           if (!updatedQuote.timezone) {
             updatedQuote.timezone = 'Australia/Melbourne';
@@ -170,25 +173,25 @@ export default function AdminPage() {
             const dateStr = new Date(updatedQuote.date).toISOString().split('T')[0];
             updatedQuote.melbourne_datetime = `${dateStr}T${updatedQuote.time}`;
           }
-          
+
           // Update the quote in state
           setAllQuotes(prevQuotes => {
             console.log('📊 [State Update] Total quotes before update:', prevQuotes.length);
             const foundQuote = prevQuotes.find(q => q.id === updatedQuote.id);
             console.log('🔍 [State Update] Found quote to update:', foundQuote ? 'YES' : 'NO');
-            
+
             if (foundQuote) {
               console.log('🔍 [State Update] Old quoted_price:', foundQuote.quoted_price);
               console.log('🔍 [State Update] Old status:', foundQuote.status);
             }
-            
+
             const updated = prevQuotes.map(quote =>
               quote.id === updatedQuote.id ? updatedQuote : quote
             );
-            
+
             console.log('📊 [State Update] Total quotes after update:', updated.length);
             console.log('✅ [Realtime] Quote state updated successfully!');
-            
+
             return updated;
           });
         }
@@ -203,7 +206,7 @@ export default function AdminPage() {
         (payload) => {
           console.log('[Realtime] Quote deleted:', payload.old);
           const deletedQuoteId = (payload.old as any).id;
-          
+
           // Remove the quote from state
           setAllQuotes(prevQuotes =>
             prevQuotes.filter(quote => quote.id !== deletedQuoteId)
@@ -245,10 +248,10 @@ export default function AdminPage() {
         (payload) => {
           console.log('[Realtime] New contact received:', payload.new);
           const newContact = payload.new as Contact;
-          
+
           // Add the new contact to the top of the list
           setContacts(prevContacts => [newContact, ...prevContacts]);
-          
+
           // Show a toast notification
           toast.success(`New contact from ${newContact.name}! 📧`, {
             description: newContact.email
@@ -265,7 +268,7 @@ export default function AdminPage() {
         (payload) => {
           console.log('[Realtime] Contact updated:', payload.new);
           const updatedContact = payload.new as Contact;
-          
+
           // Update the contact in state
           setContacts(prevContacts =>
             prevContacts.map(contact =>
@@ -284,7 +287,7 @@ export default function AdminPage() {
         (payload) => {
           console.log('[Realtime] Contact deleted:', payload.old);
           const deletedContactId = (payload.old as any).id;
-          
+
           // Remove the contact from state
           setContacts(prevContacts =>
             prevContacts.filter(contact => contact.id !== deletedContactId)
@@ -315,7 +318,7 @@ export default function AdminPage() {
     try {
       setIsLoadingQuotes(true);
       const data = await fetchQuotes();
-      
+
       // Process quotes - add timezone info for older records
       const processedQuotes = data.map(quote => {
         if (!quote.timezone) {
@@ -327,7 +330,7 @@ export default function AdminPage() {
         }
         return quote;
       });
-      
+
       setAllQuotes(processedQuotes);
     } catch (error) {
       console.error('[Admin] Error loading quotes:', error);
@@ -360,18 +363,18 @@ export default function AdminPage() {
   const updateQuoteInState = (quoteId: string, updates: Partial<Quote>) => {
     console.log('🔄 [Optimistic Update] Updating quote:', quoteId);
     console.log('📝 [Optimistic Update] Updates:', updates);
-    
+
     setAllQuotes(prevQuotes => {
       const quoteIndex = prevQuotes.findIndex(q => q.id === quoteId);
-      
+
       if (quoteIndex === -1) {
         console.warn('⚠️ [Optimistic Update] Quote not found:', quoteId);
         return prevQuotes;
       }
-      
+
       const oldQuote = prevQuotes[quoteIndex];
       const updatedQuote = { ...oldQuote, ...updates };
-      
+
       console.log('✅ [Optimistic Update] Found quote, applying updates');
       console.log('📊 [Optimistic Update] Old:', {
         status: oldQuote.status,
@@ -381,12 +384,12 @@ export default function AdminPage() {
         status: updatedQuote.status,
         quoted_price: updatedQuote.quoted_price
       });
-      
+
       // Create new array with updated quote
       // This ensures React detects the change and re-renders
       const newQuotes = [...prevQuotes];
       newQuotes[quoteIndex] = updatedQuote;
-      
+
       console.log('✅ [Optimistic Update] State updated - UI will refresh instantly');
       return newQuotes;
     });
@@ -405,9 +408,9 @@ export default function AdminPage() {
 
   // Update a specific contact without reloading all data
   const updateContactInState = (contactId: string, updates: Partial<Contact>) => {
-    setContacts(prevContacts => 
-      prevContacts.map(contact => 
-        contact.id === contactId 
+    setContacts(prevContacts =>
+      prevContacts.map(contact =>
+        contact.id === contactId
           ? { ...contact, ...updates }
           : contact
       )
@@ -428,7 +431,7 @@ export default function AdminPage() {
   const filteredQuotes = useMemo(() => {
     if (!searchQuery.trim()) return allQuotes;
     const query = searchQuery.toLowerCase().trim();
-    return allQuotes.filter(q => 
+    return allQuotes.filter(q =>
       q.name?.toLowerCase().includes(query) ||
       q.email?.toLowerCase().includes(query) ||
       q.phone?.toLowerCase().includes(query)
@@ -503,7 +506,7 @@ export default function AdminPage() {
                 <span className="hidden md:block text-[10px] opacity-70">({upcomingBookings.length})</span>
                 <span className="md:hidden text-[10px] mt-1 opacity-70">({upcomingBookings.length})</span>
               </TabsTrigger>
-              
+
               <TabsTrigger
                 value="quotes"
                 className="flex flex-col items-center justify-center py-3 px-2 text-xs sm:text-sm rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-slate-800 data-[state=active]:text-white transition-all"
@@ -513,7 +516,7 @@ export default function AdminPage() {
                 <span className="hidden md:block text-[10px] opacity-70">({quotes.length})</span>
                 <span className="md:hidden text-[10px] mt-1 opacity-70">({quotes.length})</span>
               </TabsTrigger>
-              
+
               <TabsTrigger
                 value="bookings"
                 className="flex flex-col items-center justify-center py-3 px-2 text-xs sm:text-sm rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-green-500 data-[state=active]:text-white transition-all"
@@ -523,7 +526,7 @@ export default function AdminPage() {
                 <span className="hidden md:block text-[10px] opacity-70">({bookings.length})</span>
                 <span className="md:hidden text-[10px] mt-1 opacity-70">({bookings.length})</span>
               </TabsTrigger>
-              
+
               <TabsTrigger
                 value="history"
                 className="flex flex-col items-center justify-center py-3 px-2 text-xs sm:text-sm rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-slate-700 data-[state=active]:text-white transition-all"
@@ -533,7 +536,7 @@ export default function AdminPage() {
                 <span className="hidden md:block text-[10px] opacity-70">({history.length})</span>
                 <span className="md:hidden text-[10px] mt-1 opacity-70">({history.length})</span>
               </TabsTrigger>
-              
+
               <TabsTrigger
                 value="contacts"
                 className="flex flex-col items-center justify-center py-3 px-2 text-xs sm:text-sm rounded-lg bg-gray-100 text-gray-600 data-[state=active]:bg-blue-600 data-[state=active]:text-white transition-all"
@@ -564,8 +567,8 @@ export default function AdminPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                   </div>
                 ) : (
-                  <QuotesTable 
-                    quotes={upcomingBookings} 
+                  <QuotesTable
+                    quotes={upcomingBookings}
                     onQuoteUpdate={updateQuoteInState}
                     onQuoteDelete={deleteQuoteFromState}
                     showReminder={true}
