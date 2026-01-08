@@ -190,3 +190,5 @@ If none of these work, check:
 2. Network tab in browser DevTools
 3. Supabase Discord/GitHub for known issues
 
+
+
