@@ -218,6 +218,7 @@ export function BookingWidget() {
                 vehicle_name: vehicle.name,
                 vehicle_model: vehicle.description,
                 pickup_location: pickupLocation,
+                dropoff_location: destination, // Add dropoff_location from destination
                 destinations: destinations,
                 date: date,
                 time: time,
