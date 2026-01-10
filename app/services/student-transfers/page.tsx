@@ -74,7 +74,7 @@ export default function StudentTransfersPage() {
             <ContentBlock
                 title="Trusted by Families"
                 content={`Our student transfer service is designed with safety as the #1 priority. We provide real-time tracking for parents overseas, ensuring they know exactly when their child has been picked up and arrived safely.\n\nOur chauffeurs are friendly and helpful, assisting with heavy luggage and providing a welcoming first impression of Melbourne.`}
-                imageSrc="/hero_bg.png"
+                imageSrc="/services/content/student_transfers.png"
                 imageAlt="Student Transfer"
             />
 

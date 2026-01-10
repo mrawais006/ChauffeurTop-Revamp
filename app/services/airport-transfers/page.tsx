@@ -74,7 +74,7 @@ export default function AirportTransfersPage() {
             <ContentBlock
                 title="Melbourne Airport to City Transfers"
                 content={`Travel from Melbourne Tullamarine Airport to the city in approximately 25–30 minutes, depending on traffic and time of day. Our airport transfers in Melbourne ensure a relaxed, uninterrupted journey in a well-appointed vehicle.\n\nWe offer the best airport transfers Melbourne for business and leisure travellers alike. Choose from executive sedans, luxury SUVs, people movers, minibuses, and coaches to suit your travel needs. Request a quick quote to find the private airport transfers Melbourne for your journey.`}
-                imageSrc="/hero_bg.png"
+                imageSrc="/services/content/airport_transfer.png"
                 imageAlt="Airport Transfer"
             />
 

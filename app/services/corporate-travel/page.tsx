@@ -74,7 +74,7 @@ export default function CorporateTravelPage() {
             <ContentBlock
                 title="Premium Corporate Travel"
                 content={`ChauffeurTop is the trusted choice for businesses, delivering seamless corporate chauffeur Melbourne with reliability, comfort, and professional service. From easy online booking to effortless payment, we ensure every aspect of your journey is handled with precision.\n\nOur corporate travel Melbourne chauffeurs are more than drivers; they are dedicated service professionals. Whether you prefer a quiet space to work, personalised route options, or local insights, your journey is tailored to meet your exact needs.`}
-                imageSrc="/hero_bg.png"
+                imageSrc="/services/content/corporate_travel.png"
                 imageAlt="Corporate Travel"
             />
 

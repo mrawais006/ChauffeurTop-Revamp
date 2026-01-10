@@ -74,7 +74,7 @@ export default function LuxuryToursPage() {
             <ContentBlock
                 title="A Seamless Experience From Start to Finish"
                 content={`Every Yarra Valley private wine tours Melbourne is tailored to your group’s preferences, from boutique wineries to renowned estates. Choose your pace, stops, and tasting schedule for a truly bespoke experience.\n\nFlexible Group Sizes: Whether it’s an intimate tasting for two or a larger celebration with friends and family, we provide the perfect vehicle and service for every group.\n\nComfort & Convenience: Spacious vehicles with climate control, chilled beverages, and secure storage for wine purchases ensure the journey is as enjoyable as the destinations.`}
-                imageSrc="/hero_bg.png"
+                imageSrc="/services/content/luxury_tours.png"
                 imageAlt="Luxury Winery Tour"
             />
 

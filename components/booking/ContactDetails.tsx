@@ -56,16 +56,16 @@ export default function ContactDetails({ onPhoneChange, selectedVehicle }: Conta
         {/* Email */}
         <div>
           <label htmlFor="email" className="block text-[10px] text-luxury-gold uppercase tracking-wider font-bold mb-2">
-            Email Address
+            Email Address <span className="text-red-400">*</span>
           </label>
           <input
             type="email"
             id="email"
             name="email"
             placeholder="john@example.com"
+            required
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded text-white text-sm placeholder:text-white/30 focus:border-luxury-gold focus:outline-none transition-all"
           />
-          <p className="mt-1 text-xs text-white/50">Optional - for booking confirmation</p>
         </div>
 
         {/* Phone with Country Selector */}

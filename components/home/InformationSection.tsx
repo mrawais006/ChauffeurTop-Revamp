@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function InformationSection() {
     return (
@@ -34,9 +35,11 @@ export function InformationSection() {
                         </p>
                     </div>
 
-                    <Button variant="gold" className="mt-8 bg-luxury-gold hover:bg-white text-black px-8 py-6 rounded-sm font-bold tracking-widest">
-                        BOOK YOUR TOUR NOW
-                    </Button>
+                    <Link href="/services/luxury-tours">
+                        <Button variant="gold" className="mt-8 bg-luxury-gold hover:bg-white text-black px-8 py-6 rounded-sm font-bold tracking-widest">
+                            BOOK YOUR TOUR NOW
+                        </Button>
+                    </Link>
                 </div>
 
                 <div className="w-full md:w-1/2 relative px-4 md:px-0">

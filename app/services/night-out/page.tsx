@@ -74,7 +74,7 @@ export default function NightOutPage() {
             <ContentBlock
                 title="A Night to Remember"
                 content={`Customize your itinerary as you go. Our "As Directed" hourly hire gives you the freedom to change plans on a whim. Want to stop for late-night supper or head to a different club? Just let your chauffeur know.\n\nEnjoy the privacy of our tinted windows and the comfort of our luxury interiors as you enjoy Melbourne's vibrant nightlife.`}
-                imageSrc="/hero_bg.png"
+                imageSrc="/services/content/night_out.png"
                 imageAlt="Night Out Chauffeur"
             />
 

@@ -162,18 +162,30 @@ export function Navbar() {
                                     {navLinks.map((link) => (
                                         link.hasDropdown ? (
                                             <div key={link.name} className="flex flex-col">
-                                                <button
-                                                    onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-                                                    className="flex items-center justify-between text-2xl font-serif text-white hover:text-luxury-gold transition-colors"
-                                                >
-                                                    {link.name}
-                                                    <ChevronDown
-                                                        className={cn(
-                                                            "w-6 h-6 transition-transform duration-300",
-                                                            mobileServicesOpen ? "rotate-180 text-luxury-gold" : "text-white/50"
-                                                        )}
-                                                    />
-                                                </button>
+                                                <div className="flex items-center justify-between">
+                                                    <Link
+                                                        href={link.href}
+                                                        onClick={() => setMobileMenuOpen(false)}
+                                                        className="text-2xl font-serif text-white hover:text-luxury-gold transition-colors"
+                                                    >
+                                                        {link.name}
+                                                    </Link>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            setMobileServicesOpen(!mobileServicesOpen);
+                                                        }}
+                                                        className="p-2"
+                                                        aria-label="Toggle services menu"
+                                                    >
+                                                        <ChevronDown
+                                                            className={cn(
+                                                                "w-6 h-6 transition-transform duration-300",
+                                                                mobileServicesOpen ? "rotate-180 text-luxury-gold" : "text-white/50"
+                                                            )}
+                                                        />
+                                                    </button>
+                                                </div>
 
                                                 {/* Mobile Submenu */}
                                                 <AnimatePresence>

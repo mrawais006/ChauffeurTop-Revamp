@@ -3,6 +3,7 @@
 import { motion, useMotionValue, useAnimationFrame } from "framer-motion";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 
 // Service Data with allocated images
 const services = [
@@ -10,55 +11,64 @@ const services = [
         id: "airport",
         title: "Airport Transfers",
         description: "On-time, stress-free Melbourne airport chauffeur pickups and drop-offs, with precise flight tracking and friendly meet-and-greet service.",
-        image: "/services/airport_transfer.png"
+        image: "/services/airport_transfer.png",
+        href: "/services/airport-transfers"
     },
     {
         id: "corporate",
         title: "Corporate Travel",
         description: "Professional and reliable chauffeur services for executive tours and business travel, ensuring a comfortable experience.",
-        image: "/services/corporate_travel.png"
+        image: "/services/corporate_travel.png",
+        href: "/services/corporate-travel"
     },
     {
         id: "family",
         title: "Family Travel",
         description: "Spacious, luxurious, and comfortable transport designed for safe, relaxed, and enjoyable family journeys.",
-        image: "/services/family_travel.png"
+        image: "/services/family_travel.png",
+        href: "/services/family-travel"
     },
     {
         id: "conference",
         title: "Conference & Special Events",
         description: "Seamless transport management for conferences and special occasions, tailored to schedule.",
-        image: "/services/conference_event.png"
+        image: "/services/conference_event.png",
+        href: "/services/conference-events"
     },
     {
         id: "tours",
         title: "Luxury Tours",
         description: "Private chauffeur Melbourne offers luxury tours with comfort, premier style, and expert local guidance.",
-        image: "/services/luxury_tour.png"
+        image: "/services/luxury_tour.png",
+        href: "/services/luxury-tours"
     },
     {
         id: "cruise",
         title: "Cruise Ship Transfers",
         description: "Reliable and seamless transfers to and from cruise terminals, timed perfectly to your schedule.",
-        image: "/services/cruise_ship.png"
+        image: "/services/cruise_ship.png",
+        href: "/services/cruise-ship-transfers"
     },
     {
         id: "students",
         title: "International Students Transfers",
         description: "Safe and dependable transportation for international students, providing peace of mind for families.",
-        image: "/services/student_transfer.png"
+        image: "/services/student_transfer.png",
+        href: "/services/student-transfers"
     },
     {
         id: "wedding",
         title: "Wedding Limos",
         description: "Celebrate your wedding in style. Our drivers ensure a smooth ride, so you can arrive relaxed to enjoy every moment of your special day.",
-        image: "/services/wedding_limo.png"
+        image: "/services/wedding_limo.png",
+        href: "/services/wedding-limos"
     },
     {
         id: "nightout",
         title: "Night Out",
         description: "Make your night a memorable experience with our luxurious chauffeured service. Our drivers ensure that you travel safely and comfortably.",
-        image: "/services/night_out.png"
+        image: "/services/night_out.png",
+        href: "/services/night-out"
     }
 ];
 
@@ -140,6 +150,7 @@ export function ServicesGrid() {
                             key={`${service.id}-${index}`}
                             className="relative w-[300px] h-[450px] lg:w-[calc(100vw/5.2)] flex-shrink-0 rounded-md overflow-hidden group shadow-lg select-none"
                         >
+                            <Link href={service.href || '/services'}>
                             {/* Background Image */}
                             <Image
                                 src={service.image}
@@ -176,6 +187,7 @@ export function ServicesGrid() {
                                     <div className="w-12 h-[1px] bg-luxury-gold mt-4 transform scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 delay-100"></div>
                                 </motion.div>
                             </div>
+                            </Link>
                         </div>
                     ))}
                 </motion.div>

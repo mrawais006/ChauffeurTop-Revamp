@@ -74,7 +74,7 @@ export default function ConferenceEventsPage() {
             <ContentBlock
                 title="Start Every Event with a Show-Stopping Entrance"
                 content={`ChauffeurTop Conference and Events transport elevates your guests’ experience, moving attendees or VIPs from hotels, homes, offices, or airport terminals in comfort and style. Ensure a lasting impression with a premium, reliable, and professional chauffeur service that speaks volumes before your event even begins.\n\nFrom smooth navigation through busy streets to valet-level service and punctual pick-ups, we handle the logistics so you can enjoy the moment. Make every entrance count, impress your guests, and turn ordinary travel into a memorable part of your event experience.`}
-                imageSrc="/hero_bg.png"
+                imageSrc="/services/content/conference_events.png"
                 imageAlt="Red carpet event arrival"
                 isReversed
             />

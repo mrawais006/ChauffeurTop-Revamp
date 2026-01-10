@@ -3,6 +3,7 @@
 import { CheckCircle2, MapPin, Clock, Award, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function IntroductionSection() {
     return (
@@ -38,9 +39,11 @@ export function IntroductionSection() {
                         </div>
 
                         <div className="pt-2">
-                            <Button className="bg-black text-white hover:bg-luxury-gold hover:text-black border-2 border-transparent hover:border-black uppercase text-xs font-bold tracking-[0.15em] px-8 py-4 rounded-sm transition-all duration-300 shadow-lg hover:shadow-xl">
-                                Read More About Us
-                            </Button>
+                            <Link href="/about">
+                                <Button className="bg-black text-white hover:bg-luxury-gold hover:text-black border-2 border-transparent hover:border-black uppercase text-xs font-bold tracking-[0.15em] px-8 py-4 rounded-sm transition-all duration-300 shadow-lg hover:shadow-xl">
+                                    Read More About Us
+                                </Button>
+                            </Link>
                         </div>
 
                         {/* Animated Features List - Now with Heading */}

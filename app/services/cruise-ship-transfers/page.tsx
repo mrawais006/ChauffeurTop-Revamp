@@ -74,7 +74,7 @@ export default function CruiseTransfersPage() {
             <ContentBlock
                 title="Seamless Port Connections"
                 content={`Navigating cruise terminals can be chaotic. Our experienced chauffeurs know exactly where to drop you off for the smoothest check-in experience. We assist with all heavy luggage, ensuring you don't lift a finger until you're on board.\n\nReturning home? We track your ship's arrival time to ensure we are waiting for you as soon as you disembark, ready to whisk you home in comfort.`}
-                imageSrc="/hero_bg.png"
+                imageSrc="/services/content/cruise_transfers.png"
                 imageAlt="Cruise Ship Transfer"
                 isReversed
             />

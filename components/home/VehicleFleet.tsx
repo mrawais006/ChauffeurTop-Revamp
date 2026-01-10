@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const vehicles = {
     sedan: {
@@ -110,12 +111,14 @@ export function VehicleFleet() {
                                     {vehicles[activeTab].description}
                                 </p>
 
-                                <Button
-                                    variant="gold"
-                                    className="bg-gold-gradient text-black px-8 py-6 text-sm font-bold tracking-widest hover:scale-105 transition-transform"
-                                >
-                                    BOOK THIS VEHICLE
-                                </Button>
+                                <Link href={`/booking?vehicle=${activeTab}`}>
+                                    <Button
+                                        variant="gold"
+                                        className="bg-gold-gradient text-black px-8 py-6 text-sm font-bold tracking-widest hover:scale-105 transition-transform"
+                                    >
+                                        BOOK THIS VEHICLE
+                                    </Button>
+                                </Link>
                             </div>
                         </motion.div>
                     </AnimatePresence>

@@ -74,7 +74,7 @@ export default function FamilyTravelPage() {
             <ContentBlock
                 title="Safety Isn’t an Add-On. It’s Our Priority."
                 content={`At ChauffeurTop, we don’t just provide a ride; we provide a safe and comfortable sanctuary for your family transportation Melbourne.\n\n• Vetted Professionals: All chauffeurs undergo rigorous background checks and are trained in “Family-First” etiquette.\n• Pre-Installed Car Seats: Age-appropriate seats (Infant, Toddler, Booster) are cleaned and installed before your arrival.\n• Door-to-Door Security: We ensure safe family transport in Melbourne, ensuring you and your children are safely at your destination before we depart.`}
-                imageSrc="/hero_bg.png"
+                imageSrc="/services/content/family_travel.png"
                 imageAlt="Safe Family Travel"
             />
 

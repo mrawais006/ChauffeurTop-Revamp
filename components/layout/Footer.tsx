@@ -79,19 +79,19 @@ export function Footer() {
                         </h3>
                         <ul className="space-y-4 text-sm text-white/70 font-light">
                             {[
-                                "Airport Transfers",
-                                "Corporate Travel",
-                                "Wedding Chauffeur",
-                                "Winery Tours",
-                                "Special Events"
+                                { name: "Airport Transfers", href: "/services/airport-transfers" },
+                                { name: "Corporate Travel", href: "/services/corporate-travel" },
+                                { name: "Wedding Chauffeur", href: "/services/wedding-limos" },
+                                { name: "Winery Tours", href: "/services/luxury-tours" }, 
+                                { name: "Special Events", href: "/services/conference-events" }
                             ].map((service) => (
-                                <li key={service}>
+                                <li key={service.name}>
                                     <Link
-                                        href="#"
+                                        href={service.href}
                                         className="hover:text-luxury-gold transition-colors flex items-center gap-2 group"
                                     >
                                         <span className="w-1 h-1 rounded-full bg-white/20 group-hover:bg-luxury-gold transition-colors"></span>
-                                        {service}
+                                        {service.name}
                                     </Link>
                                 </li>
                             ))}

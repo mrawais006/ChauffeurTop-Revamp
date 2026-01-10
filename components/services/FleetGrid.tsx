@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Users, Briefcase, ShoppingBag } from "lucide-react";
@@ -119,9 +120,11 @@ export function FleetGrid() {
                                     </div>
                                 </div>
 
-                                <Button className="w-full bg-transparent border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-black transition-all">
-                                    Book This Vehicle
-                                </Button>
+                                <Link href={`/booking?vehicle=${encodeURIComponent(vehicle.name)}`}>
+                                    <Button className="w-full bg-transparent border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-black transition-all">
+                                        Book This Vehicle
+                                    </Button>
+                                </Link>
                             </div>
                         </motion.div>
                     ))}

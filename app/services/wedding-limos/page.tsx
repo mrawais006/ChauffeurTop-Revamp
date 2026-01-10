@@ -74,7 +74,7 @@ export default function WeddingLimosPage() {
             <ContentBlock
                 title="Tailored Wedding Packages"
                 content={`We offer flexible packages to suit your wedding schedule, whether you need a single transfer to the ceremony or an all-day service for photos and reception transport.\n\nAmenities include white ribbons, red carpet service upon arrival, and complimentary sparkling wine to toast your celebration on the way to the reception.`}
-                imageSrc="/hero_bg.png"
+                imageSrc="/services/content/wedding_limos.png"
                 imageAlt="Wedding Car"
                 isReversed
             />

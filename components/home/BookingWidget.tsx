@@ -141,7 +141,7 @@ export function BookingWidget() {
     // Validation for each step
     const isStep1Valid = pickupLocation && destination && date && timeHour && timeMinute && timeAmPm;
     const isStep2Valid = serviceType && selectedVehicle;
-    const isStep3Valid = fullName && phoneNumber && passengers;
+    const isStep3Valid = fullName && email && phoneNumber && passengers;
     const isStep4Valid = !returnTrip || (returnPickupLocation && returnDestination && returnDate && returnTimeHour && returnTimeMinute && returnTimeAmPm);
 
     const handleNext = () => {
@@ -519,7 +519,7 @@ export function BookingWidget() {
                                 />
                             </div>
                             <div className="space-y-0.5">
-                                <label className="text-[9px] text-luxury-gold uppercase tracking-wider font-bold ml-1">Email (Optional)</label>
+                                <label className="text-[9px] text-luxury-gold uppercase tracking-wider font-bold ml-1">Email</label>
                                 <Input
                                     type="email"
                                     placeholder="your@email.com"
