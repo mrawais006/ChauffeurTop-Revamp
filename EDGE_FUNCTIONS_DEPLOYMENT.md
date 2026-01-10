@@ -1,5 +1,38 @@
+# Edge Functions Manual Deployment Guide
+
+## Prerequisites
+
+Before deploying, you need:
+1. **Resend API Key** - Get from https://resend.com/api-keys
+2. **Your Website URL** - `https://chauffertop.com.au`
+
+---
+
+## Step 1: Set Environment Variables in Supabase
+
+1. Go to your Supabase Dashboard: https://supabase.com/dashboard
+2. Select your project
+3. Go to **Project Settings** → **Edge Functions** → **Manage secrets**
+4. Add these two secrets:
+   - `RESEND_API_KEY` = `your_resend_api_key_here`
+   - `SITE_URL` = `https://chauffertop.com.au`
+
+---
+
+## Step 2: Deploy Edge Function #1 - send-quote-response
+
+### Purpose
+Sends the initial quotation email with the "Confirm Booking" button.
+
+### Steps to Deploy
+
+1. Go to **Edge Functions** in Supabase Dashboard
+2. Click **"Create a new function"**
+3. **Function Name**: `send-quote-response`
+4. **Copy and paste this code**:
+
+```typescript
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 const SITE_URL = Deno.env.get('SITE_URL') || 'http://localhost:3000';
@@ -34,9 +67,9 @@ interface QuoteData {
   };
 }
 
-serve(async (req: Request) => {
+serve(async (req) => {
   try {
-    const { quote, priceBreakdown, type } = await req.json();
+    const { quote, priceBreakdown } = await req.json();
     const quoteData: QuoteData = quote;
 
     if (!quoteData.email) {
@@ -46,7 +79,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // Build confirmation URL
+    // Build confirmation URL - IMPORTANT: Points to /api/confirm-booking
     const confirmationUrl = `${SITE_URL}/api/confirm-booking?token=${quoteData.confirmation_token}`;
 
     // Build price breakdown HTML
@@ -72,14 +105,14 @@ serve(async (req: Request) => {
             </div>
           `}
 
-          ${priceBreakdown.additional_items && priceBreakdown.additional_items.length > 0 ?
-          priceBreakdown.additional_items.map((item: any) => `
+          ${priceBreakdown.additional_items && priceBreakdown.additional_items.length > 0 ? 
+            priceBreakdown.additional_items.map((item: any) => `
               <div style="margin-bottom: 10px;">
                 <span style="color: #6b7280;">${item.description}:</span>
                 <span style="float: right; font-weight: 600;">$${item.amount.toFixed(2)}</span>
               </div>
             `).join('') : ''
-        }
+          }
 
           ${priceBreakdown.discount ? `
             <div style="border-top: 1px solid #e5e7eb; margin: 15px 0; padding-top: 10px;">
@@ -121,13 +154,11 @@ serve(async (req: Request) => {
       </head>
       <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-          <!-- Header -->
           <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 40px 20px; text-align: center;">
             <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">ChauffeurTop</h1>
             <p style="color: #e0e7ff; margin: 10px 0 0 0; font-size: 16px;">Premium Chauffeur Services</p>
           </div>
 
-          <!-- Content -->
           <div style="padding: 40px 30px;">
             <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 24px;">Your Quote is Ready!</h2>
             
@@ -139,7 +170,6 @@ serve(async (req: Request) => {
               Thank you for choosing ChauffeurTop! We're pleased to provide you with a quote for your upcoming journey.
             </p>
 
-            <!-- Trip Details -->
             <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 20px 0; border-radius: 4px;">
               <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 18px;">Trip Details</h3>
               <table style="width: 100%; border-collapse: collapse;">
@@ -172,7 +202,6 @@ serve(async (req: Request) => {
 
             ${priceBreakdownHtml}
 
-            <!-- CTA Button -->
             <div style="text-align: center; margin: 40px 0;">
               <a href="${confirmationUrl}" style="display: inline-block; background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: bold; font-size: 18px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
                 Confirm Booking
@@ -183,7 +212,6 @@ serve(async (req: Request) => {
               By clicking the button above, you confirm your booking and agree to the quoted price.
             </p>
 
-            <!-- Contact Info -->
             <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 30px 0;">
               <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 16px;">Questions or Need Changes?</h3>
               <p style="color: #6b7280; margin: 0 0 10px 0; font-size: 14px;">
@@ -202,7 +230,6 @@ serve(async (req: Request) => {
             </p>
           </div>
 
-          <!-- Footer -->
           <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
             <p style="color: #9ca3af; font-size: 12px; margin: 0;">
               © ${new Date().getFullYear()} ChauffeurTop. All rights reserved.
@@ -244,8 +271,26 @@ serve(async (req: Request) => {
   } catch (error) {
     console.error('Error in send-quote-response:', error);
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: error.message }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 });
+```
+
+5. Click **"Deploy"**
+6. Wait for deployment to complete
+
+---
+
+## ✅ Verification
+
+After deploying, test it by:
+1. Going to admin panel
+2. Sending a quote to a test email
+3. Check that the email arrives with the "Confirm Booking" button
+4. Click the button - it should go to `/api/confirm-booking?token=...`
+
+---
+
+**Continue to the next file for the other 2 Edge Functions...**

@@ -3,107 +3,107 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 const SITE_URL = Deno.env.get('SITE_URL') || 'http://localhost:3000';
 
-serve(async (req) => {
-    try {
-        const { lead, type, followUpType, customMessage, discount } = await req.json();
+serve(async (req: Request) => {
+  try {
+    const { lead, type, followUpType, customMessage, discount } = await req.json();
 
-        if (!lead.email) {
-            return new Response(
-                JSON.stringify({ error: 'Customer email is required' }),
-                { status: 400, headers: { 'Content-Type': 'application/json' } }
-            );
-        }
-
-        // Generate new confirmation token for discount follow-ups
-        let confirmationToken = lead.confirmation_token;
-        let updatedPrice = lead.quoted_price;
-
-        if (followUpType === 'discount' && discount) {
-            // Calculate new price with discount
-            if (discount.type === 'percentage') {
-                updatedPrice = lead.quoted_price * (1 - discount.value / 100);
-            } else {
-                updatedPrice = lead.quoted_price - discount.value;
-            }
-
-            // Generate new token for confirmation
-            confirmationToken = crypto.randomUUID();
-
-            // Note: The calling code should update the database with new token and price
-        }
-
-        const confirmationUrl = confirmationToken
-            ? `${SITE_URL}/api/confirm-booking?token=${confirmationToken}`
-            : null;
-
-        let emailHtml = '';
-        let subject = '';
-
-        // Build email based on follow-up type
-        switch (followUpType) {
-            case 'reminder':
-                subject = `Reminder: Your ChauffeurTop Quote - $${lead.quoted_price.toFixed(2)}`;
-                emailHtml = buildReminderEmail(lead, confirmationUrl);
-                break;
-
-            case 'discount':
-                subject = `Special Offer: ${discount.value}${discount.type === 'percentage' ? '%' : '$'} Discount on Your ChauffeurTop Booking!`;
-                emailHtml = buildDiscountEmail(lead, discount, updatedPrice, confirmationUrl);
-                break;
-
-            case 'personal':
-                subject = `Message from ChauffeurTop regarding your booking`;
-                emailHtml = buildPersonalEmail(lead, customMessage, confirmationUrl);
-                break;
-
-            default:
-                throw new Error('Invalid follow-up type');
-        }
-
-        // Send email via Resend
-        const emailResponse = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${RESEND_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                from: 'ChauffeurTop <bookings@chauffertop.com.au>',
-                to: [lead.email],
-                subject: subject,
-                html: emailHtml,
-            }),
-        });
-
-        if (!emailResponse.ok) {
-            const error = await emailResponse.text();
-            console.error('Resend API error:', error);
-            throw new Error(`Failed to send email: ${error}`);
-        }
-
-        const result = await emailResponse.json();
-
-        return new Response(
-            JSON.stringify({
-                success: true,
-                messageId: result.id,
-                newToken: followUpType === 'discount' ? confirmationToken : undefined,
-                newPrice: followUpType === 'discount' ? updatedPrice : undefined
-            }),
-            { status: 200, headers: { 'Content-Type': 'application/json' } }
-        );
-
-    } catch (error) {
-        console.error('Error in send-follow-up:', error);
-        return new Response(
-            JSON.stringify({ error: error.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
+    if (!lead.email) {
+      return new Response(
+        JSON.stringify({ error: 'Customer email is required' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
     }
+
+    // Generate new confirmation token for discount follow-ups
+    let confirmationToken = lead.confirmation_token;
+    let updatedPrice = lead.quoted_price;
+
+    if (followUpType === 'discount' && discount) {
+      // Calculate new price with discount
+      if (discount.type === 'percentage') {
+        updatedPrice = lead.quoted_price * (1 - discount.value / 100);
+      } else {
+        updatedPrice = lead.quoted_price - discount.value;
+      }
+
+      // Generate new token for confirmation
+      confirmationToken = crypto.randomUUID();
+
+      // Note: The calling code should update the database with new token and price
+    }
+
+    const confirmationUrl = confirmationToken
+      ? `${SITE_URL}/api/confirm-booking?token=${confirmationToken}`
+      : null;
+
+    let emailHtml = '';
+    let subject = '';
+
+    // Build email based on follow-up type
+    switch (followUpType) {
+      case 'reminder':
+        subject = `Reminder: Your ChauffeurTop Quote - $${lead.quoted_price.toFixed(2)}`;
+        emailHtml = buildReminderEmail(lead, confirmationUrl);
+        break;
+
+      case 'discount':
+        subject = `Special Offer: ${discount.value}${discount.type === 'percentage' ? '%' : '$'} Discount on Your ChauffeurTop Booking!`;
+        emailHtml = buildDiscountEmail(lead, discount, updatedPrice, confirmationUrl);
+        break;
+
+      case 'personal':
+        subject = `Message from ChauffeurTop regarding your booking`;
+        emailHtml = buildPersonalEmail(lead, customMessage, confirmationUrl);
+        break;
+
+      default:
+        throw new Error('Invalid follow-up type');
+    }
+
+    // Send email via Resend
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'ChauffeurTop <bookings@chauffertop.com.au>',
+        to: [lead.email],
+        subject: subject,
+        html: emailHtml,
+      }),
+    });
+
+    if (!emailResponse.ok) {
+      const error = await emailResponse.text();
+      console.error('Resend API error:', error);
+      throw new Error(`Failed to send email: ${error}`);
+    }
+
+    const result = await emailResponse.json();
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        messageId: result.id,
+        newToken: followUpType === 'discount' ? confirmationToken : undefined,
+        newPrice: followUpType === 'discount' ? updatedPrice : undefined
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Error in send-follow-up:', error);
+    return new Response(
+      JSON.stringify({ error: (error as Error).message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 });
 
 function buildReminderEmail(lead: any, confirmationUrl: string | null): string {
-    return `
+  return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -156,11 +156,11 @@ function buildReminderEmail(lead: any, confirmationUrl: string | null): string {
 }
 
 function buildDiscountEmail(lead: any, discount: any, newPrice: number, confirmationUrl: string | null): string {
-    const discountText = discount.type === 'percentage'
-        ? `${discount.value}%`
-        : `$${discount.value.toFixed(2)}`;
+  const discountText = discount.type === 'percentage'
+    ? `${discount.value}%`
+    : `$${discount.value.toFixed(2)}`;
 
-    return `
+  return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -219,7 +219,7 @@ function buildDiscountEmail(lead: any, discount: any, newPrice: number, confirma
 }
 
 function buildPersonalEmail(lead: any, message: string, confirmationUrl: string | null): string {
-    return `
+  return `
     <!DOCTYPE html>
     <html>
     <head>

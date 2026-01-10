@@ -3,34 +3,34 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 const SITE_URL = Deno.env.get('SITE_URL') || 'http://localhost:3000';
 
-serve(async (req) => {
-    try {
-        const { quote, type } = await req.json();
+serve(async (req: Request) => {
+  try {
+    const { quote, type } = await req.json();
 
-        if (type === 'customer') {
-            // Send confirmation email to customer
-            await sendCustomerConfirmation(quote);
-        } else if (type === 'admin') {
-            // Send notification to admin
-            await sendAdminNotification(quote);
-        }
-
-        return new Response(
-            JSON.stringify({ success: true }),
-            { status: 200, headers: { 'Content-Type': 'application/json' } }
-        );
-
-    } catch (error) {
-        console.error('Error in send-confirmation-email:', error);
-        return new Response(
-            JSON.stringify({ error: error.message }),
-            { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
+    if (type === 'customer') {
+      // Send confirmation email to customer
+      await sendCustomerConfirmation(quote);
+    } else if (type === 'admin') {
+      // Send notification to admin
+      await sendAdminNotification(quote);
     }
+
+    return new Response(
+      JSON.stringify({ success: true }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Error in send-confirmation-email:', error);
+    return new Response(
+      JSON.stringify({ error: (error as Error).message }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
 });
 
 async function sendCustomerConfirmation(quote: any) {
-    const emailHtml = `
+  const emailHtml = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -136,27 +136,27 @@ async function sendCustomerConfirmation(quote: any) {
     </html>
   `;
 
-    const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            from: 'ChauffeurTop <bookings@chauffertop.com.au>',
-            to: [quote.email],
-            subject: `✅ Booking Confirmed - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
-            html: emailHtml,
-        }),
-    });
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'ChauffeurTop <bookings@chauffertop.com.au>',
+      to: [quote.email],
+      subject: `✅ Booking Confirmed - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
+      html: emailHtml,
+    }),
+  });
 
-    if (!response.ok) {
-        throw new Error('Failed to send customer confirmation email');
-    }
+  if (!response.ok) {
+    throw new Error('Failed to send customer confirmation email');
+  }
 }
 
 async function sendAdminNotification(quote: any) {
-    const emailHtml = `
+  const emailHtml = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -197,21 +197,21 @@ async function sendAdminNotification(quote: any) {
     </html>
   `;
 
-    const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${RESEND_API_KEY}`,
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            from: 'ChauffeurTop System <system@chauffertop.com.au>',
-            to: ['admin@chauffertop.com.au'], // Replace with actual admin email
-            subject: `🎉 New Booking: ${quote.name} - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
-            html: emailHtml,
-        }),
-    });
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: 'ChauffeurTop System <system@chauffertop.com.au>',
+      to: ['admin@chauffertop.com.au'], // Replace with actual admin email
+      subject: `🎉 New Booking: ${quote.name} - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
+      html: emailHtml,
+    }),
+  });
 
-    if (!response.ok) {
-        throw new Error('Failed to send admin notification email');
-    }
+  if (!response.ok) {
+    throw new Error('Failed to send admin notification email');
+  }
 }
