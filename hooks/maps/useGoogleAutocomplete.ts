@@ -22,6 +22,11 @@ export function useGoogleAutocomplete({
   const [hasError, setHasError] = useState(false);
   const [value, setValue] = useState(defaultValue);
 
+  // Sync value with defaultValue changes (e.g. auto-population)
+  useEffect(() => {
+    setValue(defaultValue);
+  }, [defaultValue]);
+
   // Handle place selection
   const handlePlaceChanged = useCallback(() => {
     if (!autocompleteRef.current) return;

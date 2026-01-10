@@ -11,6 +11,7 @@ import { submitBookingForm } from "@/actions/booking";
 import type { BookingFormData, ReturnTripStructure } from "@/types/booking";
 import { toast } from "sonner";
 import { detectCityFromLocations, getCityTimezone } from "@/utils/cityDetection";
+import AddressAutocomplete from "@/components/maps/AddressAutocomplete";
 
 const vehicleDetails: Record<string, { name: string; image: string; description: string; passengers: number; luggage: number }> = {
     "executive-sedan": {
@@ -362,19 +363,19 @@ export function BookingWidget() {
                         >
                             <div className="space-y-0.5">
                                 <label className="text-[9px] text-luxury-gold uppercase tracking-wider font-bold ml-1">Pickup Location</label>
-                                <Input
+                                <AddressAutocomplete
                                     placeholder="Enter pickup address"
-                                    value={pickupLocation}
-                                    onChange={(e) => setPickupLocation(e.target.value)}
+                                    defaultValue={pickupLocation}
+                                    onAddressSelect={setPickupLocation}
                                     className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-luxury-gold h-8 text-xs"
                                 />
                             </div>
                             <div className="space-y-0.5">
                                 <label className="text-[9px] text-luxury-gold uppercase tracking-wider font-bold ml-1">Destination</label>
-                                <Input
+                                <AddressAutocomplete
                                     placeholder="Enter destination"
-                                    value={destination}
-                                    onChange={(e) => setDestination(e.target.value)}
+                                    defaultValue={destination}
+                                    onAddressSelect={setDestination}
                                     className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-luxury-gold h-8 text-xs"
                                 />
                             </div>
@@ -658,19 +659,19 @@ export function BookingWidget() {
                                     >
                                         <div className="space-y-0.5">
                                             <label className="text-[9px] text-luxury-gold uppercase tracking-wider font-bold ml-1">Return Pickup</label>
-                                            <Input
+                                            <AddressAutocomplete
                                                 placeholder="Return pickup location"
-                                                value={returnPickupLocation}
-                                                onChange={(e) => setReturnPickupLocation(e.target.value)}
+                                                defaultValue={returnPickupLocation}
+                                                onAddressSelect={setReturnPickupLocation}
                                                 className="bg-white/5 border-luxury-gold/30 text-white placeholder:text-white/30 focus:border-luxury-gold h-8 text-xs"
                                             />
                                         </div>
                                         <div className="space-y-0.5">
                                             <label className="text-[9px] text-luxury-gold uppercase tracking-wider font-bold ml-1">Return Destination</label>
-                                            <Input
+                                            <AddressAutocomplete
                                                 placeholder="Return destination"
-                                                value={returnDestination}
-                                                onChange={(e) => setReturnDestination(e.target.value)}
+                                                defaultValue={returnDestination}
+                                                onAddressSelect={setReturnDestination}
                                                 className="bg-white/5 border-luxury-gold/30 text-white placeholder:text-white/30 focus:border-luxury-gold h-8 text-xs"
                                             />
                                         </div>
