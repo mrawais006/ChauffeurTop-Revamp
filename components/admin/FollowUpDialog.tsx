@@ -37,10 +37,25 @@ export function FollowUpDialog({ quote, open, onClose, onSuccess }: FollowUpDial
     setLoading(true);
 
     try {
+      // Generate new confirmation token for discount follow-ups
+      let newConfirmationToken = quote.confirmation_token;
+      let newQuotedPrice = quote.quoted_price;
+
+      if (followUpType === 'discount' && quote.quoted_price) {
+        newConfirmationToken = crypto.randomUUID();
+
+        // Calculate new price with discount
+        if (discountType === 'percentage') {
+          newQuotedPrice = quote.quoted_price * (1 - parseFloat(discountValue) / 100);
+        } else {
+          newQuotedPrice = quote.quoted_price - parseFloat(discountValue);
+        }
+      }
+
       // Call the Edge Function to send follow-up
       const { error: emailError } = await supabase.functions.invoke('send-follow-up', {
         body: {
-          lead: quote,
+          lead: { ...quote, confirmation_token: newConfirmationToken },
           type: 'quote',
           followUpType,
           customMessage: followUpType === 'personal' ? customMessage : undefined,
@@ -54,23 +69,21 @@ export function FollowUpDialog({ quote, open, onClose, onSuccess }: FollowUpDial
       if (emailError) throw emailError;
 
       // Log the activity
-      const activityType = followUpType === 'reminder' ? 'reminder_sent' 
+      const activityType = followUpType === 'reminder' ? 'reminder_sent'
         : followUpType === 'discount' ? 'discount_sent'
-        : followUpType === 'personal' ? 'personal_email_sent'
-        : followUpType === 'call' ? 'customer_called'
-        : 'marked_lost';
+          : followUpType === 'personal' ? 'personal_email_sent'
+            : followUpType === 'call' ? 'customer_called'
+              : 'marked_lost';
 
       // Calculate discount details for activity log
       const discountDetails = followUpType === 'discount' && quote.quoted_price ? {
         value: parseFloat(discountValue),
         type: discountType,
         original_price: quote.quoted_price,
-        discount_amount: discountType === 'percentage' 
-          ? (quote.quoted_price * parseFloat(discountValue) / 100) 
+        discount_amount: discountType === 'percentage'
+          ? (quote.quoted_price * parseFloat(discountValue) / 100)
           : parseFloat(discountValue),
-        new_price: discountType === 'percentage'
-          ? (quote.quoted_price * (1 - parseFloat(discountValue) / 100))
-          : (quote.quoted_price - parseFloat(discountValue))
+        new_price: newQuotedPrice
       } : undefined;
 
       await supabase.from('quote_activities').insert({
@@ -83,30 +96,51 @@ export function FollowUpDialog({ quote, open, onClose, onSuccess }: FollowUpDial
         }
       });
 
-      // Update last follow-up timestamp
+      // Update quote in database
+      const updateData: any = {
+        last_follow_up_at: new Date().toISOString(),
+        follow_up_count: (quote.follow_up_count || 0) + 1,
+      };
+
+      // For discount follow-ups, update price and token
+      if (followUpType === 'discount') {
+        updateData.quoted_price = newQuotedPrice;
+        updateData.confirmation_token = newConfirmationToken;
+        updateData.status = 'contacted'; // Reset to contacted with new offer
+      }
+
+      // For lost leads, update status
+      if (followUpType === 'lost') {
+        updateData.status = 'lost';
+      }
+
       await supabase
         .from('quotes')
-        .update({
-          last_follow_up_at: new Date().toISOString(),
-          follow_up_count: (quote.follow_up_count || 0) + 1,
-          ...(followUpType === 'lost' && { status: 'lost' })
-        })
+        .update(updateData)
         .eq('id', quote.id);
 
       toast.success(
         followUpType === 'call' ? 'Call logged successfully' :
-        followUpType === 'lost' ? 'Lead marked as lost' :
-        'Follow-up sent successfully'
+          followUpType === 'lost' ? 'Lead marked as lost' :
+            'Follow-up sent successfully'
       );
-      
+
       // Pass the updates back to parent to update UI immediately
       const updates: Partial<Quote> = {
         last_follow_up_at: new Date().toISOString(),
         follow_up_count: (quote.follow_up_count || 0) + 1
       };
+
+      if (followUpType === 'discount') {
+        updates.quoted_price = newQuotedPrice;
+        updates.confirmation_token = newConfirmationToken;
+        updates.status = 'contacted';
+      }
+
       if (followUpType === 'lost') {
         updates.status = 'lost';
       }
+
       onSuccess(updates);
       onClose();
     } catch (error: any) {
@@ -282,7 +316,7 @@ export function FollowUpDialog({ quote, open, onClose, onSuccess }: FollowUpDial
               )}
               <div className="bg-amber-50 border border-amber-300 rounded p-2 mt-2">
                 <p className="text-xs text-amber-900 font-medium">
-                  <strong>Note:</strong> The quoted price will be permanently updated to the discounted price. 
+                  <strong>Note:</strong> The quoted price will be permanently updated to the discounted price.
                   When the customer confirms, they will see and be charged the discounted amount.
                 </p>
               </div>
@@ -330,8 +364,8 @@ export function FollowUpDialog({ quote, open, onClose, onSuccess }: FollowUpDial
               ) : (
                 <span className="text-white">
                   {followUpType === 'call' ? 'Log Call' :
-                   followUpType === 'lost' ? 'Mark as Lost' :
-                   'Send Follow-up'}
+                    followUpType === 'lost' ? 'Mark as Lost' :
+                      'Send Follow-up'}
                 </span>
               )}
             </Button>
