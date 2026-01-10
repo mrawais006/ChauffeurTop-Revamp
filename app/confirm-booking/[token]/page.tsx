@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle2, AlertCircle, Loader2, Phone, Mail, MapPin, Calendar, Clock, Users, Car } from 'lucide-react';
