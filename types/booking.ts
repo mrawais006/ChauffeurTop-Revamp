@@ -16,6 +16,7 @@ export interface BookingFormData {
   
   // Location & Time
   pickup_location: string;
+  dropoff_location: string; // First destination for database compatibility
   destinations: string[] | ReturnTripStructure;
   date: string;
   time: string;

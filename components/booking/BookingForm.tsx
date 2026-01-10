@@ -177,6 +177,7 @@ export default function BookingForm() {
         vehicle_name: selectedVehicle?.name || '',
         vehicle_model: selectedVehicle?.models || '',
         pickup_location: pickup,
+        dropoff_location: destinationsArray[0] || '', // Add dropoff_location from first destination
         destinations: destinationsField,
         date: dateString,
         time: time,
