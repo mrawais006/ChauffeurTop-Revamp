@@ -111,13 +111,13 @@ export function BookingWidget() {
 
     // Auto-populate return trip fields
     useEffect(() => {
-        if (returnTrip && destination && !returnPickupLocation) {
+        if (returnTrip && destination) {
             setReturnPickupLocation(destination);
         }
     }, [returnTrip, destination]);
 
     useEffect(() => {
-        if (returnTrip && pickupLocation && !returnDestination) {
+        if (returnTrip && pickupLocation) {
             setReturnDestination(pickupLocation);
         }
     }, [returnTrip, pickupLocation]);

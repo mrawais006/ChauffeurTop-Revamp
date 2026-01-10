@@ -36,7 +36,7 @@ serve(async (req: Request) => {
     }
 
     // Generate new confirmation token for discount follow-ups
-    let confirmationToken = lead.confirmation_token;
+    const confirmationToken = lead.confirmation_token;
     let updatedPrice = lead.quoted_price;
 
     if (followUpType === 'discount' && discount) {
@@ -46,11 +46,6 @@ serve(async (req: Request) => {
       } else {
         updatedPrice = lead.quoted_price - discount.value;
       }
-
-      // Generate new token for confirmation
-      confirmationToken = crypto.randomUUID();
-
-      // Note: The calling code should update the database with new token and price
     }
 
     const confirmationUrl = confirmationToken
@@ -89,7 +84,7 @@ serve(async (req: Request) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'ChauffeurTop <bookings@chauffertop.com.au>',
+        from: 'ChauffeurTop <notifications@chauffeurtop.com.au>', // Fixed sender
         to: [lead.email],
         subject: subject,
         html: emailHtml,
@@ -123,6 +118,20 @@ serve(async (req: Request) => {
   }
 });
 
+// Common Styles for Consistency
+const styles = `
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; background-color: #f9fafb; }
+  .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+  .header { background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); padding: 40px 30px; text-align: center; }
+  .header h1 { color: #1A1F2C; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .content { padding: 40px 30px; }
+  .section-box { background: #f9fafb; border-left: 4px solid #C5A572; padding: 20px; margin: 25px 0; border-radius: 4px; }
+  .price-box { background: linear-gradient(135deg, #111827 0%, #374151 100%); color: #C5A572; padding: 20px; text-align: center; border-radius: 8px; margin: 30px 0; }
+  .cta-button { display: inline-block; background: #111827; color: #C5A572 !important; padding: 16px 32px; text-decoration: none; border-radius: 4px; font-weight: 700; font-size: 16px; margin: 25px 0; text-align: center; display: block; }
+  .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; }
+  .link { color: #111827; text-decoration: none; font-weight: 600; }
+`;
+
 function buildReminderEmail(lead: any, confirmationUrl: string | null): string {
   return `
     <!DOCTYPE html>
@@ -130,45 +139,47 @@ function buildReminderEmail(lead: any, confirmationUrl: string | null): string {
     <head>
       <meta charset="utf-8">
       <title>Reminder: Your ChauffeurTop Quote</title>
+      <style>${styles}</style>
     </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f3f4f6;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 40px 20px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 28px;">ChauffeurTop</h1>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>ChauffeurTop</h1>
         </div>
 
-        <div style="padding: 40px 30px;">
-          <h2 style="color: #1f2937; margin: 0 0 20px 0;">Hi ${lead.name},</h2>
+        <div class="content">
+          <h2>Hi ${lead.name},</h2>
           
-          <p style="color: #4b5563; line-height: 1.6;">
-            We wanted to follow up on the quote we sent you for your upcoming trip on <strong>${new Date(lead.date).toLocaleDateString('en-AU')}</strong>.
-          </p>
+          <p>We wanted to follow up on the quote we sent you for your upcoming trip on <strong>${new Date(lead.date).toLocaleDateString('en-AU')}</strong>.</p>
+          
+          <div class="price-box">
+             <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; color: #9CA3AF;">Your Quote</div>
+             <div style="font-size: 32px; font-weight: 700;">$${lead.quoted_price.toFixed(2)}</div>
+          </div>
 
-          <p style="color: #4b5563; line-height: 1.6;">
-            Your quote is still available at <strong style="color: #d97706; font-size: 20px;">$${lead.quoted_price.toFixed(2)}</strong>
-          </p>
-
-          <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; color: #1e40af;"><strong>Pickup:</strong> ${lead.pickup_location}</p>
-            <p style="margin: 10px 0 0 0; color: #1e40af;"><strong>Dropoff:</strong> ${lead.dropoff_location}</p>
+          <div class="section-box">
+            <h3 style="margin: 0 0 10px 0; color: #111827; font-size: 16px;">Trip Details</h3>
+            <p><strong>Pickup:</strong> ${lead.pickup_location}</p>
+            <p><strong>Dropoff:</strong> ${lead.dropoff_location || 'As instructed'}</p>
           </div>
 
           ${confirmationUrl ? `
-            <div style="text-align: center; margin: 40px 0;">
-              <a href="${confirmationUrl}" style="display: inline-block; background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: bold; font-size: 18px;">
-                Confirm Booking Now
-              </a>
-            </div>
+            <a href="${confirmationUrl}" class="cta-button">
+              CONFIRM BOOKING NOW
+            </a>
           ` : ''}
 
           <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
             If you have any questions or would like to make changes, please don't hesitate to contact us.
           </p>
 
-          <p style="color: #6b7280; font-size: 14px;">
-            📞 <a href="tel:+61412345678" style="color: #3b82f6;">+61 412 345 678</a><br>
-            ✉️ <a href="mailto:bookings@chauffertop.com.au" style="color: #3b82f6;">bookings@chauffertop.com.au</a>
-          </p>
+          <div class="footer">
+            <p>
+              📞 <a href="tel:+61412345678" class="link">+61 412 345 678</a><br>
+              ✉️ <a href="mailto:bookings@chauffeurtop.com.au" class="link">bookings@chauffeurtop.com.au</a>
+            </p>
+            <p>© ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
+          </div>
         </div>
       </div>
     </body>
@@ -187,51 +198,52 @@ function buildDiscountEmail(lead: any, discount: any, newPrice: number, confirma
     <head>
       <meta charset="utf-8">
       <title>Special Discount Offer!</title>
+      <style>${styles}</style>
     </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f3f4f6;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-        <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 40px 20px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🎉 Special Offer!</h1>
-          <p style="color: #d1fae5; margin: 10px 0 0 0; font-size: 18px;">Exclusive Discount for You</p>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>🎉 Special Offer!</h1>
+          <p style="color: #1A1F2C; margin: 5px 0 0 0; font-weight: 500;">Exclusive Discount for You</p>
         </div>
 
-        <div style="padding: 40px 30px;">
-          <h2 style="color: #1f2937; margin: 0 0 20px 0;">Hi ${lead.name},</h2>
+        <div class="content">
+          <h2>Hi ${lead.name},</h2>
           
-          <p style="color: #4b5563; line-height: 1.6;">
-            We'd love to have you as our customer! We're offering you a special <strong style="color: #059669;">${discountText} discount</strong> on your booking.
-          </p>
+          <p>We'd love to have you as our customer! We're offering you a special <strong>${discountText} discount</strong> on your booking.</p>
 
-          <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 25px; border-radius: 12px; margin: 30px 0; text-align: center; border: 2px solid #f59e0b;">
-            <p style="margin: 0; color: #92400e; font-size: 16px;">Original Price</p>
-            <p style="margin: 5px 0; color: #92400e; font-size: 24px; text-decoration: line-through;">$${lead.quoted_price.toFixed(2)}</p>
-            <p style="margin: 15px 0 5px 0; color: #059669; font-size: 18px; font-weight: bold;">Your Discounted Price</p>
-            <p style="margin: 0; color: #059669; font-size: 36px; font-weight: bold;">$${newPrice.toFixed(2)}</p>
-            <p style="margin: 10px 0 0 0; color: #059669; font-size: 16px;">You save $${(lead.quoted_price - newPrice).toFixed(2)}!</p>
+          <div class="price-box">
+            <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; color: #9CA3AF;">Original Price</div>
+            <div style="font-size: 20px; text-decoration: line-through; margin-bottom: 15px; color: #6B7280;">$${lead.quoted_price.toFixed(2)}</div>
+            
+            <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; color: #fff;">Your Discounted Price</div>
+            <div style="font-size: 36px; font-weight: 700; color: #C5A572;">$${newPrice.toFixed(2)}</div>
+            <div style="margin-top: 10px; color: #10B981; font-weight: 600;">You save $${(lead.quoted_price - newPrice).toFixed(2)}!</div>
           </div>
 
-          <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 0; color: #1e40af;"><strong>Date:</strong> ${new Date(lead.date).toLocaleDateString('en-AU')}</p>
-            <p style="margin: 10px 0; color: #1e40af;"><strong>Pickup:</strong> ${lead.pickup_location}</p>
-            <p style="margin: 0; color: #1e40af;"><strong>Dropoff:</strong> ${lead.dropoff_location}</p>
+          <div class="section-box">
+             <h3 style="margin: 0 0 10px 0; color: #111827; font-size: 16px;">Trip Details</h3>
+             <p><strong>Date:</strong> ${new Date(lead.date).toLocaleDateString('en-AU')}</p>
+             <p><strong>Pickup:</strong> ${lead.pickup_location}</p>
+             <p><strong>Dropoff:</strong> ${lead.dropoff_location || 'As instructed'}</p>
           </div>
 
           ${confirmationUrl ? `
-            <div style="text-align: center; margin: 40px 0;">
-              <a href="${confirmationUrl}" style="display: inline-block; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; text-decoration: none; padding: 18px 50px; border-radius: 8px; font-weight: bold; font-size: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                Claim Your Discount Now!
-              </a>
-            </div>
-            <p style="color: #dc2626; text-align: center; font-weight: 600; margin: 10px 0;">
+            <a href="${confirmationUrl}" class="cta-button">
+              CLAIM THIS OFFER
+            </a>
+            <p style="color: #EF4444; text-align: center; font-weight: 600; margin: 10px 0;">
               ⏰ This offer is time-limited!
             </p>
           ` : ''}
 
-          <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-            Questions? Contact us anytime:<br>
-            📞 <a href="tel:+61412345678" style="color: #3b82f6;">+61 412 345 678</a><br>
-            ✉️ <a href="mailto:bookings@chauffertop.com.au" style="color: #3b82f6;">bookings@chauffertop.com.au</a>
-          </p>
+          <div class="footer">
+            <p>
+              📞 <a href="tel:+61412345678" class="link">+61 412 345 678</a><br>
+              ✉️ <a href="mailto:bookings@chauffeurtop.com.au" class="link">bookings@chauffeurtop.com.au</a>
+            </p>
+            <p>© ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
+          </div>
         </div>
       </div>
     </body>
@@ -246,42 +258,43 @@ function buildPersonalEmail(lead: any, message: string, confirmationUrl: string 
     <head>
       <meta charset="utf-8">
       <title>Message from ChauffeurTop</title>
+      <style>${styles}</style>
     </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f3f4f6;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
-        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 40px 20px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 28px;">ChauffeurTop</h1>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>ChauffeurTop</h1>
         </div>
 
-        <div style="padding: 40px 30px;">
-          <h2 style="color: #1f2937; margin: 0 0 20px 0;">Hi ${lead.name},</h2>
+        <div class="content">
+          <h2>Hi ${lead.name},</h2>
           
-          <div style="background-color: #f9fafb; padding: 20px; border-left: 4px solid #3b82f6; border-radius: 4px; margin: 20px 0;">
-            <p style="color: #1f2937; line-height: 1.6; margin: 0; white-space: pre-wrap;">${message}</p>
+          <div style="background-color: #f3f4f6; padding: 25px; border-radius: 8px; margin: 20px 0; font-style: italic; border-left: 4px solid #111827;">
+            "${message}"
           </div>
 
-          <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 30px 0;">
-            <h3 style="margin: 0 0 15px 0; color: #1e40af;">Your Booking Details</h3>
-            <p style="margin: 5px 0; color: #1e40af;"><strong>Date:</strong> ${new Date(lead.date).toLocaleDateString('en-AU')}</p>
-            <p style="margin: 5px 0; color: #1e40af;"><strong>Time:</strong> ${lead.time}</p>
-            <p style="margin: 5px 0; color: #1e40af;"><strong>Pickup:</strong> ${lead.pickup_location}</p>
-            <p style="margin: 5px 0; color: #1e40af;"><strong>Dropoff:</strong> ${lead.dropoff_location}</p>
-            ${lead.quoted_price ? `<p style="margin: 15px 0 0 0; color: #d97706; font-size: 20px; font-weight: bold;">Price: $${lead.quoted_price.toFixed(2)}</p>` : ''}
+          <div class="section-box">
+            <h3 style="margin: 0 0 10px 0; color: #111827; font-size: 16px;">Booking Details</h3>
+            <p><strong>Date:</strong> ${new Date(lead.date).toLocaleDateString('en-AU')}</p>
+            <p><strong>Time:</strong> ${lead.time}</p>
+            <p><strong>Pickup:</strong> ${lead.pickup_location}</p>
+            <p><strong>Dropoff:</strong> ${lead.dropoff_location || 'As instructed'}</p>
+            ${lead.quoted_price ? `<p style="margin-top: 10px;"><strong>Price:</strong> $${lead.quoted_price.toFixed(2)}</p>` : ''}
           </div>
 
           ${confirmationUrl ? `
-            <div style="text-align: center; margin: 40px 0;">
-              <a href="${confirmationUrl}" style="display: inline-block; background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-weight: bold; font-size: 18px;">
-                Confirm Booking
-              </a>
-            </div>
+            <a href="${confirmationUrl}" class="cta-button">
+              CONFIRM BOOKING
+            </a>
           ` : ''}
 
-          <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-            Feel free to reach out if you have any questions:<br>
-            📞 <a href="tel:+61412345678" style="color: #3b82f6;">+61 412 345 678</a><br>
-            ✉️ <a href="mailto:bookings@chauffertop.com.au" style="color: #3b82f6;">bookings@chauffertop.com.au</a>
-          </p>
+          <div class="footer">
+            <p>
+              📞 <a href="tel:+61412345678" class="link">+61 412 345 678</a><br>
+              ✉️ <a href="mailto:bookings@chauffeurtop.com.au" class="link">bookings@chauffeurtop.com.au</a>
+            </p>
+            <p>© ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
+          </div>
         </div>
       </div>
     </body>

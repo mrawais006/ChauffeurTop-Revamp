@@ -76,14 +76,14 @@ export default function BookingForm() {
   useEffect(() => {
     if (needsReturnTrip && destinations.length > 0) {
       const lastDestination = destinations[destinations.length - 1]?.address;
-      if (lastDestination && !returnPickup) {
+      if (lastDestination) {
         setReturnPickup(lastDestination);
       }
     }
   }, [needsReturnTrip, destinations]);
 
   useEffect(() => {
-    if (needsReturnTrip && pickup && !returnDestination) {
+    if (needsReturnTrip && pickup) {
       setReturnDestination(pickup);
     }
   }, [needsReturnTrip, pickup]);
