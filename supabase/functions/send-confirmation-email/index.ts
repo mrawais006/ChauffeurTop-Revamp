@@ -131,7 +131,7 @@ async function sendCustomerConfirmation(apiKey: string, quote: any) {
               📞 Phone: <a href="tel:+61412345678" style="color: #3b82f6; text-decoration: none; font-weight: 600;">+61 412 345 678</a>
             </p>
             <p style="color: #6b7280; margin: 0; font-size: 14px;">
-              ✉️ Email: <a href="mailto:bookings@chauffertop.com.au" style="color: #3b82f6; text-decoration: none; font-weight: 600;">bookings@chauffertop.com.au</a>
+              ✉️ Email: <a href="mailto:bookings@chauffeurtop.com.au" style="color: #3b82f6; text-decoration: none; font-weight: 600;">bookings@chauffeurtop.com.au</a>
             </p>
           </div>
 
@@ -161,7 +161,7 @@ async function sendCustomerConfirmation(apiKey: string, quote: any) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'ChauffeurTop <bookings@chauffertop.com.au>',
+      from: 'ChauffeurTop <bookings@chauffeurtop.com.au>',
       to: [quote.email],
       subject: `✅ Booking Confirmed - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
       html: emailHtml,
@@ -179,37 +179,180 @@ async function sendAdminNotification(apiKey: string, quote: any) {
     <html>
     <head>
       <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>New Booking Confirmation</title>
+      <style>
+        body { 
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          line-height: 1.6; 
+          color: #1f2937; 
+          margin: 0;
+          padding: 0;
+          background-color: #f9fafb;
+        }
+        .container { 
+          max-width: 600px; 
+          margin: 0 auto; 
+          background: #ffffff;
+        }
+        .header { 
+          background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); 
+          padding: 40px 30px; 
+          text-align: center;
+        }
+        .header h1 { 
+          color: #1A1F2C; 
+          margin: 0; 
+          font-size: 28px; 
+          font-weight: 700;
+          letter-spacing: -0.5px;
+        }
+        .content { 
+          padding: 40px 30px; 
+        }
+        .section-box {
+          background: #f9fafb;
+          border-left: 4px solid #C5A572;
+          padding: 20px;
+          margin: 25px 0;
+          border-radius: 4px;
+        }
+        .section-box h3 {
+          margin: 0 0 15px 0;
+          color: #1f2937;
+          font-size: 18px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .detail-row {
+          display: flex;
+          justify-content: space-between;
+          border-bottom: 1px solid #e5e7eb;
+          padding: 8px 0;
+        }
+        .detail-row:last-child {
+          border-bottom: none;
+        }
+        .detail-label {
+          color: #6b7280;
+          font-weight: 500;
+        }
+        .detail-value {
+          color: #111827;
+          font-weight: 600;
+          text-align: right;
+        }
+        .price-tag {
+          background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%);
+          color: #1A1F2C;
+          padding: 15px;
+          text-align: center;
+          font-weight: bold;
+          font-size: 24px;
+          border-radius: 8px;
+          margin-top: 20px;
+        }
+        .cta-button { 
+          display: inline-block; 
+          background: #111827;
+          color: #C5A572 !important; 
+          padding: 16px 32px; 
+          text-decoration: none; 
+          border-radius: 4px; 
+          font-weight: 700;
+          font-size: 16px;
+          margin: 25px 0;
+          text-align: center;
+          display: block;
+        }
+        .footer {
+          background: #f9fafb;
+          padding: 30px;
+          text-align: center;
+          color: #6b7280;
+          font-size: 12px;
+          border-top: 1px solid #e5e7eb;
+        }
+      </style>
     </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f3f4f6;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px;">
-        <h1 style="color: #1f2937; margin: 0 0 20px 0;">🎉 New Booking Confirmed!</h1>
-        
-        <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h2 style="margin: 0 0 15px 0; color: #1e40af;">Customer Details</h2>
-          <p style="margin: 5px 0; color: #1f2937;"><strong>Name:</strong> ${quote.name}</p>
-          <p style="margin: 5px 0; color: #1f2937;"><strong>Email:</strong> ${quote.email}</p>
-          <p style="margin: 5px 0; color: #1f2937;"><strong>Phone:</strong> ${quote.phone}</p>
+    <body>
+      <div class="container">
+        <!-- Header -->
+        <div class="header">
+          <h1>🎉 New Booking Confirmed</h1>
+          <p style="margin: 10px 0 0 0; color: #1A1F2C; font-weight: 500;">
+            Ref: #${quote.id.substring(0, 8).toUpperCase()}
+          </p>
         </div>
 
-        <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h2 style="margin: 0 0 15px 0; color: #166534;">Trip Details</h2>
-          <p style="margin: 5px 0; color: #1f2937;"><strong>Date:</strong> ${new Date(quote.date).toLocaleDateString('en-AU')}</p>
-          <p style="margin: 5px 0; color: #1f2937;"><strong>Time:</strong> ${quote.time}</p>
-          <p style="margin: 5px 0; color: #1f2937;"><strong>Pickup:</strong> ${quote.pickup_location}</p>
-          <p style="margin: 5px 0; color: #1f2937;"><strong>Dropoff:</strong> ${quote.dropoff_location}</p>
-          <p style="margin: 5px 0; color: #1f2937;"><strong>Vehicle:</strong> ${quote.vehicle_name}</p>
-          <p style="margin: 5px 0; color: #1f2937;"><strong>Passengers:</strong> ${quote.passengers}</p>
-          <p style="margin: 15px 0 0 0; color: #d97706; font-size: 20px;"><strong>Amount:</strong> $${quote.quoted_price.toFixed(2)}</p>
+        <div class="content">
+          <!-- Customer Details -->
+          <div class="section-box">
+            <h3>👤 Customer Details</h3>
+            <div class="detail-row">
+              <span class="detail-label">Name</span>
+              <span class="detail-value">${quote.name}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Email</span>
+              <span class="detail-value"><a href="mailto:${quote.email}" style="color: #111827; text-decoration: none;">${quote.email}</a></span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Phone</span>
+              <span class="detail-value"><a href="tel:${quote.phone}" style="color: #111827; text-decoration: none;">${quote.phone}</a></span>
+            </div>
+          </div>
+
+          <!-- Trip Details -->
+          <div class="section-box">
+            <h3>🚗 Trip Information</h3>
+            <div class="detail-row">
+              <span class="detail-label">Date</span>
+              <span class="detail-value">${new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Time</span>
+              <span class="detail-value">${quote.time}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Vehicle</span>
+              <span class="detail-value">${quote.vehicle_name}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Passengers</span>
+              <span class="detail-value">${quote.passengers}</span>
+            </div>
+          </div>
+
+          <!-- Locations -->
+          <div class="section-box">
+            <h3>📍 Route</h3>
+            <div style="margin-bottom: 15px;">
+              <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Pickup</div>
+              <div style="font-weight: 600; color: #111827;">${quote.pickup_location}</div>
+            </div>
+            <div>
+              <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Dropoff</div>
+              <div style="font-weight: 600; color: #111827;">${quote.dropoff_location || quote.destinations?.[0] || 'As discussed'}</div>
+            </div>
+          </div>
+
+          <!-- Price -->
+          <div class="price-tag">
+            $${quote.quoted_price.toFixed(2)}
+          </div>
+
+          <!-- Action -->
+          <a href="${SITE_URL}/admin" class="cta-button">
+            VIEW IN ADMIN PANEL
+          </a>
         </div>
 
-        <div style="background-color: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-          <p style="margin: 0; color: #92400e;"><strong>Booking ID:</strong> ${quote.id}</p>
+        <!-- Footer -->
+        <div class="footer">
+          <p>This is an automated notification from ChauffeurTop.</p>
+          <p>© ${new Date().getFullYear()} ChauffeurTop. All rights reserved.</p>
         </div>
-
-        <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-          <a href="${SITE_URL}/admin" style="color: #3b82f6; text-decoration: none;">View in Admin Panel →</a>
-        </p>
       </div>
     </body>
     </html>
@@ -222,9 +365,9 @@ async function sendAdminNotification(apiKey: string, quote: any) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'ChauffeurTop System <system@chauffertop.com.au>',
-      to: ['admin@chauffertop.com.au'], // Replace with actual admin email
-      subject: `🎉 New Booking: ${quote.name} - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
+      from: 'ChauffeurTop Admin <notifications@chauffeurtop.com.au>',
+      to: ['bookings@chauffeurtop.com.au'], // Updated to correct admin email
+      subject: `New Booking: ${quote.name} - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
       html: emailHtml,
     }),
   });
