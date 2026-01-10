@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation';
 
-export default function ConfirmBookingPage({
+export default async function ConfirmBookingPage({
     searchParams,
 }: {
-    searchParams: { token?: string; type?: string };
+    searchParams: Promise<{ token?: string; type?: string }>;
 }) {
-    const token = searchParams.token;
+    const { token } = await searchParams;
 
     if (token) {
         // If we have a token query param, redirect to the dynamic route
