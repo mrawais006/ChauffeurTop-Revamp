@@ -1,12 +1,13 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
 
-export default function ConfirmBookingErrorPage() {
+function ErrorContent() {
     const searchParams = useSearchParams();
     const reason = searchParams.get('reason') || 'unknown';
 
@@ -91,5 +92,19 @@ export default function ConfirmBookingErrorPage() {
                 </div>
             </Card>
         </div>
+    );
+}
+
+export default function ConfirmBookingErrorPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
+                <Card className="p-8 max-w-lg w-full text-center">
+                    <p className="text-gray-600">Loading...</p>
+                </Card>
+            </div>
+        }>
+            <ErrorContent />
+        </Suspense>
     );
 }
