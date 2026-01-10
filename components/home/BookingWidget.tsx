@@ -109,6 +109,31 @@ export function BookingWidget() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // Auto-populate return trip fields
+    useEffect(() => {
+        if (returnTrip && destination && !returnPickupLocation) {
+            setReturnPickupLocation(destination);
+        }
+    }, [returnTrip, destination]);
+
+    useEffect(() => {
+        if (returnTrip && pickupLocation && !returnDestination) {
+            setReturnDestination(pickupLocation);
+        }
+    }, [returnTrip, pickupLocation]);
+
+    // Reset return fields when toggle is off
+    useEffect(() => {
+        if (!returnTrip) {
+            setReturnPickupLocation('');
+            setReturnDestination('');
+            setReturnDate('');
+            setReturnTimeHour('');
+            setReturnTimeMinute('');
+            setReturnTimeAmPm('');
+        }
+    }, [returnTrip]);
+
     const activeVehicle = selectedVehicle ? vehicleDetails[selectedVehicle] : null;
     const maxPassengers = activeVehicle ? activeVehicle.passengers : 7;
 
