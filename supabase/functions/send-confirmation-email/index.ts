@@ -1,6 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 const SITE_URL = Deno.env.get('SITE_URL') || 'http://localhost:3000';
 
 export const corsHeaders = {
@@ -15,14 +14,23 @@ serve(async (req: Request) => {
   }
 
   try {
+    console.log('Received request for send-confirmation-email');
+
+    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+    if (!RESEND_API_KEY) {
+      console.error('Missing RESEND_API_KEY environment variable');
+      throw new Error('Server configuration error: Missing email API key');
+    }
+
     const { quote, type } = await req.json();
+    console.log(`Processing ${type} email for quote ${quote?.id}`);
 
     if (type === 'customer') {
       // Send confirmation email to customer
-      await sendCustomerConfirmation(quote);
+      await sendCustomerConfirmation(RESEND_API_KEY, quote);
     } else if (type === 'admin') {
       // Send notification to admin
-      await sendAdminNotification(quote);
+      await sendAdminNotification(RESEND_API_KEY, quote);
     }
 
     return new Response(
@@ -39,7 +47,7 @@ serve(async (req: Request) => {
   }
 });
 
-async function sendCustomerConfirmation(quote: any) {
+async function sendCustomerConfirmation(apiKey: string, quote: any) {
   const emailHtml = `
     <!DOCTYPE html>
     <html>
@@ -149,7 +157,7 @@ async function sendCustomerConfirmation(quote: any) {
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${RESEND_API_KEY}`,
+      'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -165,7 +173,7 @@ async function sendCustomerConfirmation(quote: any) {
   }
 }
 
-async function sendAdminNotification(quote: any) {
+async function sendAdminNotification(apiKey: string, quote: any) {
   const emailHtml = `
     <!DOCTYPE html>
     <html>
@@ -210,7 +218,7 @@ async function sendAdminNotification(quote: any) {
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${RESEND_API_KEY}`,
+      'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({

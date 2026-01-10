@@ -1,6 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
 const SITE_URL = Deno.env.get('SITE_URL') || 'http://localhost:3000';
 
 export const corsHeaders = {
@@ -15,9 +14,21 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { lead, type, followUpType, customMessage, discount } = await req.json();
+    console.log('Received request for send-follow-up');
 
-    if (!lead.email) {
+    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+    if (!RESEND_API_KEY) {
+      console.error('Missing RESEND_API_KEY environment variable');
+      throw new Error('Server configuration error: Missing email API key');
+    }
+
+    const body = await req.json();
+    console.log('Request body:', JSON.stringify(body));
+
+    const { lead, type, followUpType, customMessage, discount } = body;
+
+    if (!lead || !lead.email) {
+      console.error('Missing customer email in lead data');
       return new Response(
         JSON.stringify({ error: 'Customer email is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

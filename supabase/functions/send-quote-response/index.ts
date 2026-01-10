@@ -1,7 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!;
+// Remove unused import to prevent potential load errors
+// import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
 const SITE_URL = Deno.env.get('SITE_URL') || 'http://localhost:3000';
 
 export const corsHeaders = {
@@ -46,18 +47,46 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { quote, priceBreakdown, type } = await req.json();
+    console.log('Received request for send-quote-response');
+
+    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+    if (!RESEND_API_KEY) {
+      console.error('Missing RESEND_API_KEY environment variable');
+      throw new Error('Server configuration error: Missing email API key');
+    }
+
+    const body = await req.json();
+    console.log('Request body:', JSON.stringify(body));
+
+    const { quote, priceBreakdown, type } = body;
     const quoteData: QuoteData = quote;
 
+    if (!quoteData) {
+      throw new Error('Missing quote data in request body');
+    }
+
     if (!quoteData.email) {
+      console.error('Missing customer email in quote data');
       return new Response(
         JSON.stringify({ error: 'Customer email is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    console.log(`Preparing to send email to ${quoteData.email}`);
+
     // Build confirmation URL
     const confirmationUrl = `${SITE_URL}/api/confirm-booking?token=${quoteData.confirmation_token}`;
+
+    // ... (rest of the code is generated dynamically in next steps) 
+    // Wait, I need to preserve the breakdown HTML generation logic or rewrite it.
+    // Since replace_file_content replaces a block, I must be careful.
+    
+    // STOP. The logic below "Build price breakdown HTML" is complex. 
+    // I should only replace the top part and let the rest be.
+    
+    // I will restart the ReplacementContent to only cover the top part.
+
 
     // Build price breakdown HTML
     let priceBreakdownHtml = '';
