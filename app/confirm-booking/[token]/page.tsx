@@ -3,9 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { createClient } from '@supabase/supabase-js';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { CheckCircle2, AlertCircle, Loader2, Phone, Mail, MapPin, Calendar, Clock, Users, Car } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 interface Quote {
@@ -13,15 +11,7 @@ interface Quote {
     name: string;
     email: string;
     phone: string;
-    date: string;
-    time: string;
-    pickup_location: string;
-    dropoff_location: string;
-    vehicle_name: string;
-    passengers: number;
-    quoted_price: number;
     status: string;
-    price_breakdown?: any;
 }
 
 export default function ConfirmBookingPage() {
@@ -84,231 +74,131 @@ export default function ConfirmBookingPage() {
         fetchQuoteDetails();
     }, [token, supabase]);
 
+    // Loading State
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-                <Card className="p-8 max-w-md w-full text-center">
-                    <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto mb-4" />
-                    <p className="text-gray-600">Loading your booking details...</p>
-                </Card>
+            <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-x-hidden">
+                {/* Decorative background elements */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div className="absolute -top-32 -left-32 w-64 h-64 bg-gradient-to-br from-luxury-gold/10 to-transparent rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-gradient-to-br from-luxury-gold/8 to-transparent rounded-full blur-3xl"></div>
+                </div>
+
+                <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+                    <div className="bg-black/50 backdrop-blur-md py-16 px-8 shadow-2xl sm:rounded-xl border border-luxury-gold/20 text-center">
+                        <div className="w-16 h-16 border-4 border-luxury-gold border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+                        <p className="text-luxury-gold/70 font-serif text-sm">Loading your booking details...</p>
+                    </div>
+                </div>
             </div>
         );
     }
 
+    // Error State
     if (error || !quote) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-                <Card className="p-8 max-w-md w-full">
-                    <div className="text-center">
-                        <AlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
-                        <h1 className="text-2xl font-bold text-gray-900 mb-2">Booking Not Found</h1>
-                        <p className="text-gray-600 mb-6">{error}</p>
+            <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-x-hidden">
+                {/* Decorative background elements */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div className="absolute -top-32 -left-32 w-64 h-64 bg-gradient-to-br from-luxury-gold/10 to-transparent rounded-full blur-3xl"></div>
+                    <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-gradient-to-br from-luxury-gold/8 to-transparent rounded-full blur-3xl"></div>
+                </div>
+
+                <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+                    <div className="bg-black/50 backdrop-blur-md py-12 px-8 shadow-2xl sm:rounded-xl border border-red-500/30 text-center">
+                        <AlertCircle className="h-16 w-16 text-red-400 mx-auto mb-6" />
+                        <h1 className="text-2xl font-serif font-bold text-white mb-3">Booking Not Found</h1>
+                        <p className="text-gray-400 mb-8 text-sm">{error}</p>
                         <Link href="/">
-                            <Button className="bg-blue-600 hover:bg-blue-700">
+                            <button className="w-full bg-luxury-gold text-luxury-black hover:bg-white hover:text-black font-bold uppercase tracking-widest py-4 px-6 rounded-sm transition-all duration-300 shadow-lg hover:shadow-xl text-xs">
                                 Return to Homepage
-                            </Button>
+                            </button>
                         </Link>
                     </div>
-                </Card>
+                </div>
             </div>
         );
     }
 
     const isAlreadyConfirmed = alreadyConfirmed || quote.status === 'confirmed' || quote.status === 'completed';
 
+    // Success State
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-12 px-4">
-            <div className="max-w-3xl mx-auto">
-                {/* Success/Already Confirmed Header */}
-                <Card className={`p-8 mb-6 ${isAlreadyConfirmed && !success ? 'border-amber-300 bg-amber-50' : 'border-green-300 bg-green-50'}`}>
-                    <div className="text-center">
-                        <CheckCircle2 className={`h-20 w-20 mx-auto mb-4 ${isAlreadyConfirmed && !success ? 'text-amber-600' : 'text-green-600'}`} />
+        <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-x-hidden">
+            {/* Decorative background elements */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute -top-32 -left-32 w-64 h-64 bg-gradient-to-br from-luxury-gold/10 to-transparent rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-gradient-to-br from-luxury-gold/8 to-transparent rounded-full blur-3xl"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-luxury-gold/5 to-transparent rounded-full blur-3xl"></div>
+            </div>
 
-                        {isAlreadyConfirmed && !success ? (
-                            <>
-                                <h1 className="text-3xl font-bold text-amber-900 mb-2">
-                                    Booking Already Confirmed
-                                </h1>
-                                <p className="text-lg text-amber-700">
-                                    This booking has already been confirmed. No further action is needed.
-                                </p>
-                            </>
-                        ) : (
-                            <>
-                                <h1 className="text-3xl font-bold text-green-900 mb-2">
-                                    Booking Confirmed! 🎉
-                                </h1>
-                                <p className="text-lg text-green-700">
-                                    Thank you for confirming your booking with ChauffeurTop!
-                                </p>
-                            </>
-                        )}
+            <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
+                {/* Success Header */}
+                <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-luxury-gold to-luxury-gold/80 mb-6 shadow-2xl shadow-luxury-gold/30">
+                        <CheckCircle2 className="h-12 w-12 text-luxury-black" />
                     </div>
-                </Card>
-
-                {/* Booking Details */}
-                <Card className="p-8 mb-6">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        <Car className="h-6 w-6 text-blue-600" />
-                        Your Booking Details
-                    </h2>
-
-                    <div className="space-y-4">
-                        {/* Customer Info */}
-                        <div className="grid md:grid-cols-2 gap-4 pb-4 border-b">
-                            <div className="flex items-start gap-3">
-                                <Users className="h-5 w-5 text-gray-500 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-500">Passenger Name</p>
-                                    <p className="font-semibold text-gray-900">{quote.name}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <Phone className="h-5 w-5 text-gray-500 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-500">Phone</p>
-                                    <p className="font-semibold text-gray-900">{quote.phone}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3 md:col-span-2">
-                                <Mail className="h-5 w-5 text-gray-500 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-500">Email</p>
-                                    <p className="font-semibold text-gray-900">{quote.email}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Trip Details */}
-                        <div className="grid md:grid-cols-2 gap-4 pb-4 border-b">
-                            <div className="flex items-start gap-3">
-                                <Calendar className="h-5 w-5 text-gray-500 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-500">Date</p>
-                                    <p className="font-semibold text-gray-900">
-                                        {new Date(quote.date).toLocaleDateString('en-AU', {
-                                            weekday: 'long',
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric'
-                                        })}
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <Clock className="h-5 w-5 text-gray-500 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-500">Pickup Time</p>
-                                    <p className="font-semibold text-gray-900">{quote.time}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Locations */}
-                        <div className="space-y-3 pb-4 border-b">
-                            <div className="flex items-start gap-3">
-                                <MapPin className="h-5 w-5 text-green-600 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-500">Pickup Location</p>
-                                    <p className="font-semibold text-gray-900">{quote.pickup_location}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <MapPin className="h-5 w-5 text-red-600 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-500">Dropoff Location</p>
-                                    <p className="font-semibold text-gray-900">{quote.dropoff_location}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Vehicle & Passengers */}
-                        <div className="grid md:grid-cols-2 gap-4 pb-4 border-b">
-                            <div className="flex items-start gap-3">
-                                <Car className="h-5 w-5 text-gray-500 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-500">Vehicle</p>
-                                    <p className="font-semibold text-gray-900">{quote.vehicle_name}</p>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <Users className="h-5 w-5 text-gray-500 mt-0.5" />
-                                <div>
-                                    <p className="text-sm text-gray-500">Passengers</p>
-                                    <p className="font-semibold text-gray-900">{quote.passengers}</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Price */}
-                        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-6 rounded-lg border-2 border-amber-300">
-                            <div className="flex justify-between items-center">
-                                <span className="text-xl font-bold text-gray-900">Total Amount</span>
-                                <span className="text-3xl font-bold text-amber-700">
-                                    ${quote.quoted_price?.toFixed(2) || '0.00'}
-                                </span>
-                            </div>
-                            {quote.price_breakdown?.discount && (
-                                <p className="text-sm text-green-700 mt-2">
-                                    ✓ Discount applied: {quote.price_breakdown.discount.reason}
-                                </p>
-                            )}
-                        </div>
-                    </div>
-                </Card>
-
-                {/* Next Steps */}
-                <Card className="p-8 mb-6 bg-blue-50 border-blue-200">
-                    <h2 className="text-xl font-bold text-blue-900 mb-4">What Happens Next?</h2>
-                    <ul className="space-y-3 text-blue-800">
-                        <li className="flex items-start gap-2">
-                            <CheckCircle2 className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <span>You will receive a confirmation email shortly with all booking details</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                            <CheckCircle2 className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <span>Our team will contact you 24 hours before your pickup time to confirm</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                            <CheckCircle2 className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <span>Your chauffeur will arrive 10 minutes before the scheduled pickup time</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                            <CheckCircle2 className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                            <span>Payment can be made after the service via bank transfer or cash</span>
-                        </li>
-                    </ul>
-                </Card>
-
-                {/* Contact Information */}
-                <Card className="p-8">
-                    <h2 className="text-xl font-bold text-gray-900 mb-4">Need to Make Changes?</h2>
-                    <p className="text-gray-600 mb-4">
-                        If you need to modify or cancel your booking, please contact us:
+                    <h1 className="text-4xl font-serif font-bold text-white mb-3">
+                        {isAlreadyConfirmed && !success ? 'Already Confirmed' : 'Booking Confirmed!'}
+                    </h1>
+                    <div className="w-48 h-1 bg-gradient-to-r from-transparent via-luxury-gold to-transparent mx-auto mb-4"></div>
+                    <p className="text-luxury-gold/70 font-serif text-sm">
+                        {isAlreadyConfirmed && !success 
+                            ? 'This booking has already been confirmed.'
+                            : 'Thank you for confirming your booking with ChauffeurTop!'
+                        }
                     </p>
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                            <Phone className="h-5 w-5 text-blue-600" />
-                            <a href="tel:+61412345678" className="text-blue-600 hover:underline font-semibold">
-                                +61 412 345 678
-                            </a>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <Mail className="h-5 w-5 text-blue-600" />
-                            <a href="mailto:bookings@chauffertop.com.au" className="text-blue-600 hover:underline font-semibold">
-                                bookings@chauffertop.com.au
-                            </a>
+                </div>
+
+                {/* Main Card */}
+                <div className="bg-black/50 backdrop-blur-md py-10 px-8 shadow-2xl sm:rounded-xl border border-luxury-gold/20">
+                    {/* Success Message */}
+                    <div className="text-center mb-8">
+                        <p className="text-white/90 text-base leading-relaxed">
+                            You will receive a confirmation email shortly with all your booking details.
+                        </p>
+                    </div>
+
+                    {/* Contact Information */}
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-8">
+                        <h3 className="text-luxury-gold font-serif font-bold text-sm uppercase tracking-wider mb-4 text-center">
+                            Need Assistance?
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-center gap-3">
+                                <Phone className="h-4 w-4 text-luxury-gold" />
+                                <a 
+                                    href="tel:+61430240945" 
+                                    className="text-white hover:text-luxury-gold transition-colors text-sm font-medium"
+                                >
+                                    +61 430 240 945
+                                </a>
+                            </div>
+                            <div className="flex items-center justify-center gap-3">
+                                <Mail className="h-4 w-4 text-luxury-gold" />
+                                <a 
+                                    href="mailto:admin@chauffeurtop.com.au" 
+                                    className="text-white hover:text-luxury-gold transition-colors text-sm font-medium"
+                                >
+                                    admin@chauffeurtop.com.au
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </Card>
 
-                {/* Return Home Button */}
-                <div className="text-center mt-8">
+                    {/* Return Home Button */}
                     <Link href="/">
-                        <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
+                        <button className="w-full bg-luxury-gold text-luxury-black hover:bg-white hover:text-black font-bold uppercase tracking-widest py-4 px-6 rounded-sm transition-all duration-300 shadow-lg hover:shadow-xl text-xs">
                             Return to Homepage
-                        </Button>
+                        </button>
                     </Link>
+
+                    {/* Footer Note */}
+                    <div className="mt-6 text-center">
+                        <p className="text-xs text-white/50 font-serif">
+                            ChauffeurTop Melbourne - Premium Chauffeur Services
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
