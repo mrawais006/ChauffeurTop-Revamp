@@ -18,9 +18,15 @@ export function useGoogleAutocomplete({
 }: UseGoogleAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const onPlaceSelectRef = useRef(onPlaceSelect); // Stable ref for callback
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [value, setValue] = useState(defaultValue);
+
+  // Update ref when callback changes
+  useEffect(() => {
+    onPlaceSelectRef.current = onPlaceSelect;
+  }, [onPlaceSelect]);
 
   // Sync value with defaultValue changes (e.g. auto-population)
   useEffect(() => {
@@ -37,12 +43,14 @@ export function useGoogleAutocomplete({
     if (address) {
       console.log('[Autocomplete] Place selected:', address);
       setValue(address);
-      onPlaceSelect(address);
+      if (onPlaceSelectRef.current) {
+        onPlaceSelectRef.current(address);
+      }
 
       // Complete session for cost optimization
       sessionTokenManager.completeSession();
     }
-  }, [onPlaceSelect]);
+  }, []);
 
   // Initialize autocomplete
   useEffect(() => {
@@ -100,20 +108,23 @@ export function useGoogleAutocomplete({
         autocompleteRef.current = null;
       }
     };
-  }, [handlePlaceChanged]);
+  }, [handlePlaceChanged]); // strictly dependent only on stable dependencies
 
   // Handle manual input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
+    const newValue = e.target.value;
+    setValue(newValue);
+    onPlaceSelect(newValue); // Propagate changes immediately to parent
   };
 
-  // Handle blur (save manual entry)
+  // Handle blur (save manual entry final check)
   const handleBlur = () => {
     if (inputRef.current) {
       const currentValue = inputRef.current.value;
+      // Ensure specific consistency on blur
       if (currentValue !== value) {
-        setValue(currentValue);
-        onPlaceSelect(currentValue);
+         setValue(currentValue);
+         onPlaceSelect(currentValue);
       }
     }
   };

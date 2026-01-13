@@ -2,8 +2,6 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { AlertCircle, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
 
@@ -44,53 +42,79 @@ function ErrorContent() {
     const { title, message } = getErrorMessage();
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-            <Card className="p-8 max-w-lg w-full">
-                <div className="text-center">
-                    <AlertCircle className="h-20 w-20 text-red-500 mx-auto mb-6" />
-                    <h1 className="text-3xl font-bold text-gray-900 mb-3">{title}</h1>
-                    <p className="text-lg text-gray-600 mb-8">{message}</p>
+        <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-x-hidden">
+            {/* Decorative background elements */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute -top-32 -left-32 w-64 h-64 bg-gradient-to-br from-luxury-gold/10 to-transparent rounded-full blur-3xl"></div>
+                <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-gradient-to-br from-luxury-gold/8 to-transparent rounded-full blur-3xl"></div>
+            </div>
+
+            <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+                <div className="bg-black/50 backdrop-blur-md py-12 px-8 shadow-2xl sm:rounded-xl border border-red-500/30 text-center">
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-500/10 mb-6 border border-red-500/20">
+                        <AlertCircle className="h-8 w-8 text-red-500" />
+                    </div>
+                    
+                    <h1 className="text-2xl font-serif font-bold text-white mb-3">
+                        {title}
+                    </h1>
+                    
+                    <p className="text-white/60 mb-8 text-sm leading-relaxed">
+                        {message}
+                    </p>
 
                     {/* Contact Information */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-                        <h2 className="text-lg font-semibold text-blue-900 mb-4">Need Help?</h2>
-                        <div className="space-y-3 text-left">
+                    <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-8 text-left">
+                        <h2 className="text-luxury-gold font-serif font-bold text-xs uppercase tracking-wider mb-4 text-center">
+                            Need Assistance?
+                        </h2>
+                        <div className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <Phone className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                                <div className="p-2 bg-white/5 rounded-full">
+                                    <Phone className="h-4 w-4 text-luxury-gold" />
+                                </div>
                                 <div>
-                                    <p className="text-sm text-gray-600">Call us</p>
-                                    <a href="tel:+61412345678" className="text-blue-600 hover:underline font-semibold">
-                                        +61 412 345 678
+                                    <p className="text-xs text-white/40 uppercase tracking-wide mb-0.5">Call us</p>
+                                    <a href="tel:+61430240945" className="text-white hover:text-luxury-gold transition-colors text-sm font-medium">
+                                        +61 430 240 945
                                     </a>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <Mail className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                                <div className="p-2 bg-white/5 rounded-full">
+                                    <Mail className="h-4 w-4 text-luxury-gold" />
+                                </div>
                                 <div>
-                                    <p className="text-sm text-gray-600">Email us</p>
-                                    <a href="mailto:bookings@chauffertop.com.au" className="text-blue-600 hover:underline font-semibold">
-                                        bookings@chauffertop.com.au
+                                    <p className="text-xs text-white/40 uppercase tracking-wide mb-0.5">Email us</p>
+                                    <a href="mailto:admin@chauffeurtop.com.au" className="text-white hover:text-luxury-gold transition-colors text-sm font-medium">
+                                        admin@chauffeurtop.com.au
                                     </a>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                        <Link href="/" className="flex-1">
-                            <Button variant="outline" className="w-full">
+                    <div className="flex flex-col gap-3">
+                        <Link href="/">
+                            <button className="w-full bg-luxury-gold text-luxury-black hover:bg-white hover:text-black font-bold uppercase tracking-widest py-4 px-6 rounded-sm transition-all duration-300 shadow-lg hover:shadow-xl text-xs">
                                 Return to Homepage
-                            </Button>
+                            </button>
                         </Link>
-                        <Link href="/booking" className="flex-1">
-                            <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                        <Link href="/booking">
+                            <button className="w-full bg-transparent border border-white/20 text-white hover:bg-white/10 hover:border-white/40 font-bold uppercase tracking-widest py-4 px-6 rounded-sm transition-all duration-300 text-xs">
                                 Make New Booking
-                            </Button>
+                            </button>
                         </Link>
                     </div>
                 </div>
-            </Card>
+                
+                {/* Footer Note */}
+                <div className="mt-8 text-center">
+                    <p className="text-xs text-white/30 font-serif">
+                        ChauffeurTop Melbourne - Premium Chauffeur Services
+                    </p>
+                </div>
+            </div>
         </div>
     );
 }
@@ -98,10 +122,8 @@ function ErrorContent() {
 export default function ConfirmBookingErrorPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
-                <Card className="p-8 max-w-lg w-full text-center">
-                    <p className="text-gray-600">Loading...</p>
-                </Card>
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="text-luxury-gold text-sm animate-pulse font-serif">Loading...</div>
             </div>
         }>
             <ErrorContent />

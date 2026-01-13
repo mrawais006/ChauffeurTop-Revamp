@@ -1,6 +1,6 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { normalizePhoneNumber } from '@/utils/phoneNormalization';
 import { detectCityFromLocations, getCityTimezone } from '@/utils/cityDetection';
 import type { BookingFormData, BookingSubmissionResult, ReturnTripStructure } from '@/types/booking';
@@ -22,15 +22,30 @@ export async function submitBookingForm(
     console.log('Phone normalized:', formData.phone, '→', normalizedPhone);
 
     // 3. Prepare submission data
+    // Manually generate token to ensure it exists for the email/SMS logic
+    const confirmationToken = crypto.randomUUID();
+    
     const submissionData = {
       ...formData,
       phone: normalizedPhone,
+      confirmation_token: confirmationToken,
+      status: 'pending', // Explicitly set status
     };
 
+    console.log('Inserting quote with token:', confirmationToken);
+
     // 4. Submit to Supabase quotes table (all bookings go here)
-    const { error: submitError } = await supabase
+    // Use admin client to bypass RLS policies for insert+select
+    if (!supabaseAdmin) {
+      console.error('SERVER ERROR: SUPABASE_SERVICE_ROLE_KEY is missing');
+      return { success: false, error: 'Server configuration error. Please contact support.' };
+    }
+
+    const { data: quote, error: submitError } = await supabaseAdmin
       .from('quotes')
-      .insert(submissionData);
+      .insert(submissionData)
+      .select() // Retrieve the inserted record
+      .single();
 
     if (submitError) {
       console.error('Supabase error:', submitError);
@@ -41,8 +56,10 @@ export async function submitBookingForm(
     }
 
     // 5. Send email notification
-    await sendBookingNotification(formData);
-
+    if (quote) {
+       await sendBookingNotification(quote);
+    }
+    
     return { success: true };
   } catch (error) {
     console.error('Error submitting booking form:', error);
@@ -74,23 +91,23 @@ export async function submitBookingForm(
   }
 }
 
-async function sendBookingNotification(formData: BookingFormData): Promise<void> {
+async function sendBookingNotification(quoteData: any): Promise<void> {
   try {
     // Check if this is a return trip
-    const isReturnTrip = formData.destinations && 
-      typeof formData.destinations === 'object' && 
-      !Array.isArray(formData.destinations) &&
-      (formData.destinations as any).type === 'return_trip';
+    const isReturnTrip = quoteData.destinations && 
+      typeof quoteData.destinations === 'object' && 
+      !Array.isArray(quoteData.destinations) &&
+      (quoteData.destinations as any).type === 'return_trip';
     
     let notificationData: any;
     
     if (isReturnTrip) {
-      const returnTripData = formData.destinations as ReturnTripStructure;
+      const returnTripData = quoteData.destinations as ReturnTripStructure;
       const outboundDests = returnTripData.outbound.destinations || [];
       
       notificationData = {
-        ...formData,
-        destinations: formData.destinations,
+        ...quoteData,
+        destinations: quoteData.destinations,
         destination1: outboundDests[0] || '',
         destination2: outboundDests[1] || '',
         destination3: outboundDests[2] || '',
@@ -102,12 +119,12 @@ async function sendBookingNotification(formData: BookingFormData): Promise<void>
         returnTime: returnTripData.return.time,
       };
     } else {
-      const destinationsArray = Array.isArray(formData.destinations)
-        ? formData.destinations
+      const destinationsArray = Array.isArray(quoteData.destinations)
+        ? quoteData.destinations
         : [];
       
       notificationData = {
-        ...formData,
+        ...quoteData,
         destinations: destinationsArray,
         destination1: destinationsArray[0] || '',
         destination2: destinationsArray[1] || '',
@@ -118,11 +135,12 @@ async function sendBookingNotification(formData: BookingFormData): Promise<void>
     }
 
     const { error: notificationError } = await supabase.functions.invoke(
-      'send-notification',
+      'send-quote-response',
       {
         body: {
-          type: 'booking',
-          ...notificationData,
+          type: 'booking_received',
+          quote: notificationData,
+          priceBreakdown: null // No price breakdown for initial request
         },
       }
     );

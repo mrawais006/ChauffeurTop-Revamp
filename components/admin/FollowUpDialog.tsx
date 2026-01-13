@@ -37,13 +37,16 @@ export function FollowUpDialog({ quote, open, onClose, onSuccess }: FollowUpDial
     setLoading(true);
 
     try {
-      // Generate new confirmation token for discount follow-ups
+      // Reuse existing token for discount follow-ups to keep previous links valid
       let newConfirmationToken = quote.confirmation_token;
       let newQuotedPrice = quote.quoted_price;
 
-      if (followUpType === 'discount' && quote.quoted_price) {
+      // Only generate a token if one doesn't exist (shouldn't happen for valid quotes, but safety first)
+      if (followUpType === 'discount' && !newConfirmationToken) {
         newConfirmationToken = crypto.randomUUID();
+      }
 
+      if (followUpType === 'discount' && quote.quoted_price) {
         // Calculate new price with discount
         if (discountType === 'percentage') {
           newQuotedPrice = quote.quoted_price * (1 - parseFloat(discountValue) / 100);
@@ -52,28 +55,30 @@ export function FollowUpDialog({ quote, open, onClose, onSuccess }: FollowUpDial
         }
       }
 
-      // Call the Edge Function to send follow-up
-      const { error: emailError } = await supabase.functions.invoke('send-follow-up', {
-        body: {
-          lead: { ...quote, confirmation_token: newConfirmationToken },
-          type: 'quote',
-          followUpType,
-          customMessage: followUpType === 'personal' ? customMessage : undefined,
-          discount: followUpType === 'discount' ? {
-            value: parseFloat(discountValue),
-            type: discountType
-          } : undefined
-        }
-      });
+      // Only call the Edge Function for actual emails (reminder, discount, personal)
+      if (followUpType !== 'call' && followUpType !== 'lost') {
+        const { error: emailError } = await supabase.functions.invoke('send-follow-up', {
+          body: {
+            lead: { ...quote, confirmation_token: newConfirmationToken },
+            type: 'quote',
+            followUpType,
+            customMessage: followUpType === 'personal' ? customMessage : undefined,
+            discount: followUpType === 'discount' ? {
+              value: parseFloat(discountValue),
+              type: discountType
+            } : undefined
+          }
+        });
 
-      if (emailError) throw emailError;
+        if (emailError) throw emailError;
+      }
 
       // Log the activity
       const activityType = followUpType === 'reminder' ? 'reminder_sent'
         : followUpType === 'discount' ? 'discount_sent'
           : followUpType === 'personal' ? 'personal_email_sent'
             : followUpType === 'call' ? 'customer_called'
-              : 'marked_lost';
+              : 'marked_lost'; // We'll still log it as marked_lost execution, even if status becomes cancelled
 
       // Calculate discount details for activity log
       const discountDetails = followUpType === 'discount' && quote.quoted_price ? {
@@ -102,16 +107,16 @@ export function FollowUpDialog({ quote, open, onClose, onSuccess }: FollowUpDial
         follow_up_count: (quote.follow_up_count || 0) + 1,
       };
 
-      // For discount follow-ups, update price and token
+      // For discount follow-ups, update price (token is reused)
       if (followUpType === 'discount') {
         updateData.quoted_price = newQuotedPrice;
-        updateData.confirmation_token = newConfirmationToken;
+        updateData.confirmation_token = newConfirmationToken; // Ensure we keep/set the token
         updateData.status = 'contacted'; // Reset to contacted with new offer
       }
 
-      // For lost leads, update status
+      // For lost leads, update status to cancelled as requested
       if (followUpType === 'lost') {
-        updateData.status = 'lost';
+        updateData.status = 'cancelled';
       }
 
       await supabase
@@ -121,7 +126,7 @@ export function FollowUpDialog({ quote, open, onClose, onSuccess }: FollowUpDial
 
       toast.success(
         followUpType === 'call' ? 'Call logged successfully' :
-          followUpType === 'lost' ? 'Lead marked as lost' :
+          followUpType === 'lost' ? 'Lead marked as lost (Cancelled)' :
             'Follow-up sent successfully'
       );
 
@@ -138,7 +143,7 @@ export function FollowUpDialog({ quote, open, onClose, onSuccess }: FollowUpDial
       }
 
       if (followUpType === 'lost') {
-        updates.status = 'lost';
+        updates.status = 'cancelled';
       }
 
       onSuccess(updates);

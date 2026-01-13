@@ -47,7 +47,9 @@ export async function GET(request: NextRequest) {
             .update({
                 status: 'confirmed',
                 quote_accepted_at: new Date().toISOString(),
-                confirmation_token: null // Clear token to prevent reuse
+                // We keep the token so that if the user clicks the link again, 
+                // we can identify the booking and show "Already Confirmed" instead of "Invalid Link"
+                // confirmation_token: null 
             })
             .eq('id', quote.id);
 

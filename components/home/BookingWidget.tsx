@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
@@ -64,9 +65,11 @@ const countries = [
 ];
 
 export function BookingWidget() {
+    const router = useRouter();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
-    const [step4Interacted, setStep4Interacted] = useState(false); // Track if user has interacted with Step 4
+
+    const [isFormReady, setIsFormReady] = useState(false); // Delay enabling submit to prevent accidental clicks
 
     // Step 1: Location & DateTime
     const [pickupLocation, setPickupLocation] = useState("");
@@ -144,14 +147,19 @@ export function BookingWidget() {
     const isStep3Valid = fullName && email && phoneNumber && passengers;
     const isStep4Valid = !returnTrip || (returnPickupLocation && returnDestination && returnDate && returnTimeHour && returnTimeMinute && returnTimeAmPm);
 
+    // Manage form readiness
+    useEffect(() => {
+        if (step === 4) {
+            const timer = setTimeout(() => setIsFormReady(true), 800);
+            return () => clearTimeout(timer);
+        } else {
+            setIsFormReady(false);
+        }
+    }, [step]);
+
     const handleNext = () => {
         if (step < 4) {
-            const nextStep = step + 1;
-            setStep(nextStep);
-            // Reset step 4 interaction flag when entering step 4
-            if (nextStep === 4) {
-                setStep4Interacted(false);
-            }
+            setStep(step + 1);
         }
     };
 
@@ -171,10 +179,9 @@ export function BookingWidget() {
             return;
         }
 
-        // CRITICAL: Prevent submission until user has interacted with Step 4
-        if (!step4Interacted) {
-            console.log('Form submission prevented: user has not interacted with Step 4 yet');
-            toast.error('Please review the form before submitting');
+        // Prevent submission if form is not ready (prevents ghost submissions/double clicks)
+        if (!isFormReady) {
+            console.log('Form submission prevented: form not ready');
             return;
         }
 
@@ -262,33 +269,8 @@ export function BookingWidget() {
             const result = await submitBookingForm(bookingData);
 
             if (result.success) {
-                toast.success('Quote request submitted successfully! 🎉', {
-                    description: 'We\'ll get back to you shortly with a quote.'
-                });
-
-                // Reset form
-                setStep(1);
-                setPickupLocation('');
-                setDestination('');
-                setDate('');
-                setTimeHour('');
-                setTimeMinute('');
-                setTimeAmPm('');
-                setServiceType('');
-                setSelectedVehicle('');
-                setFullName('');
-                setEmail('');
-                setPhoneNumber('');
-                setPassengers('');
-                setSpecialInstructions('');
-                setReturnTrip(false);
-                setReturnPickupLocation('');
-                setReturnDestination('');
-                setReturnDate('');
-                setReturnTimeHour('');
-                setReturnTimeMinute('');
-                setReturnTimeAmPm('');
-                setStep4Interacted(false); // Reset interaction flag
+                // Redirect to Thank You page
+                router.push('/thank-you');
             } else {
                 toast.error('Failed to submit quote request', {
                     description: result.error || 'Please try again.'
@@ -617,7 +599,6 @@ export function BookingWidget() {
                                     value={specialInstructions}
                                     onChange={(e) => {
                                         setSpecialInstructions(e.target.value);
-                                        setStep4Interacted(true); // Mark as interacted
                                     }}
                                     className="w-full h-16 px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white text-xs placeholder:text-white/30 focus:border-luxury-gold focus:outline-none resize-none"
                                 />
@@ -627,7 +608,6 @@ export function BookingWidget() {
                             <div
                                 onClick={() => {
                                     setReturnTrip(!returnTrip);
-                                    setStep4Interacted(true); // Mark as interacted
                                 }}
                                 className={cn(
                                     "flex items-center justify-between p-2 rounded-lg border cursor-pointer transition-all",
@@ -756,12 +736,7 @@ export function BookingWidget() {
                     ) : (
                         <Button
                             type="submit"
-                            onClick={(e) => {
-                                console.log('Submit button clicked');
-                                setStep4Interacted(true); // Mark as interacted when button is clicked
-                                // Form will handle submission via onSubmit
-                            }}
-                            disabled={!isStep4Valid || loading}
+                            disabled={!isStep4Valid || loading || !isFormReady}
                             className={cn(
                                 "flex-1 h-9 text-xs font-bold tracking-widest bg-luxury-gold hover:bg-white hover:text-luxury-black transition-colors text-black shadow-lg rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
                             )}

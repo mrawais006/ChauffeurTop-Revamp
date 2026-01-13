@@ -139,12 +139,12 @@ export default function ConfirmBookingPage() {
                         <CheckCircle2 className="h-12 w-12 text-luxury-black" />
                     </div>
                     <h1 className="text-4xl font-serif font-bold text-white mb-3">
-                        {isAlreadyConfirmed && !success ? 'Already Confirmed' : 'Booking Confirmed!'}
+                        {isAlreadyConfirmed && !success ? 'Link Expired' : 'Booking Confirmed!'}
                     </h1>
                     <div className="w-48 h-1 bg-gradient-to-r from-transparent via-luxury-gold to-transparent mx-auto mb-4"></div>
                     <p className="text-luxury-gold/70 font-serif text-sm">
                         {isAlreadyConfirmed && !success 
-                            ? 'This booking has already been confirmed.'
+                            ? 'The token expired and you have already booked.'
                             : 'Thank you for confirming your booking with ChauffeurTop!'
                         }
                     </p>

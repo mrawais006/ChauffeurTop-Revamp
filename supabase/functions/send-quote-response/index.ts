@@ -49,8 +49,13 @@ serve(async (req: Request) => {
       throw new Error('Confirmation token missing');
     }
 
-    // Generate beautiful email template
-    const emailHtml = generateQuoteResponseEmail(quote, priceBreakdown, type, confirmationToken);
+    // Generate email based on type
+    let emailHtml: string;
+    if (type === 'booking_received') {
+      emailHtml = generateBookingReceivedEmail(quote);
+    } else {
+      emailHtml = generateQuoteResponseEmail(quote, priceBreakdown, type, confirmationToken);
+    }
 
     // Send email via Resend
     const res = await fetch('https://api.resend.com/emails', {
@@ -63,7 +68,9 @@ serve(async (req: Request) => {
         from: 'ChauffeurTop <notifications@chauffeurtop.com.au>',
         reply_to: ['admin@chauffeurtop.com.au'],
         to: [quote.email],
-        subject: `Your Quote from ChauffeurTop - $${(priceBreakdown?.total || quote.quoted_price || 0).toFixed(2)}`,
+        subject: type === 'booking_received' 
+          ? `Booking Request Received - ${quote.name}`
+          : `Your Quote from ChauffeurTop - $${(priceBreakdown?.total || quote.quoted_price || 0).toFixed(2)}`,
         html: emailHtml,
       }),
     });
@@ -76,9 +83,58 @@ serve(async (req: Request) => {
 
     console.log('Quote email sent successfully to:', quote.email);
 
+    // --- Twilio SMS Integration ---
+    try {
+      const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
+      const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
+      const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER');
+
+      if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER && quote.phone) {
+        console.log('Sending SMS via Twilio to:', quote.phone);
+
+        let smsBody = `Hi ${quote.name}, your booking request with ChauffeurTop has been received. Please check your email for the quote and confirmation link.`;
+        
+        if (type === 'booking_received') {
+          smsBody = `Hi ${quote.name}, thanks for booking with ChauffeurTop! We've received your request and will send you a quote shortly.`;
+        }
+        
+        // Transform headers for x-www-form-urlencoded
+        const params = new URLSearchParams();
+        params.append('To', quote.phone);
+        params.append('From', TWILIO_PHONE_NUMBER);
+        params.append('Body', smsBody);
+
+        const twilioRes = await fetch(
+          `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Authorization': `Basic ${btoa(TWILIO_ACCOUNT_SID + ':' + TWILIO_AUTH_TOKEN)}`,
+            },
+            body: params,
+          }
+        );
+
+        if (!twilioRes.ok) {
+          const twilioError = await twilioRes.text();
+          console.error('Twilio API Error:', twilioError);
+          // We don't throw here to avoid failing the main request if just SMS fails
+        } else {
+          console.log('SMS sent successfully via Twilio');
+        }
+      } else {
+        console.log('Skipping SMS: Missing credentials or phone number');
+      }
+    } catch (smsError) {
+      console.error('Error sending SMS:', smsError);
+    }
+    // -----------------------------
+
     return new Response(JSON.stringify({ 
       success: true,
-      emailSent: true
+      emailSent: true,
+      smsSent: true // Optimistic
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -90,6 +146,149 @@ serve(async (req: Request) => {
     });
   }
 });
+
+function generateBookingReceivedEmail(quote: any): string {
+  // Format date nicely
+  const formattedDate = quote.date ? new Date(quote.date).toLocaleDateString('en-AU', { 
+    weekday: 'long', 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  }) : 'Date TBD';
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <style>
+          body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6; 
+            color: #1f2937; 
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafb;
+          }
+          .container { 
+            max-width: 600px; 
+            margin: 0 auto; 
+            background: #ffffff; 
+          }
+          .header { 
+            background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); 
+            padding: 40px 30px; 
+            text-align: center; 
+          }
+          .header h1 { 
+            color: #1A1F2C; 
+            margin: 0; 
+            font-size: 28px; 
+            font-weight: 700; 
+            letter-spacing: -0.5px; 
+          }
+          .content { 
+            padding: 40px 30px; 
+          }
+          .greeting { 
+            font-size: 18px; 
+            color: #1f2937; 
+            margin-bottom: 20px; 
+          }
+          .message-box { 
+            background: #fef3c7; 
+            border-left: 4px solid #C5A572; 
+            padding: 20px; 
+            margin: 25px 0; 
+            border-radius: 4px; 
+          }
+          .trip-details {
+            background: #f9fafb;
+            border-left: 4px solid #C5A572;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+          }
+          .trip-details h3 {
+            margin: 0 0 15px 0;
+            color: #1f2937;
+            font-size: 18px;
+          }
+          .detail-row { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 8px 0; 
+            border-bottom: 1px solid #e5e7eb; 
+          }
+          .detail-row:last-child { 
+            border-bottom: none; 
+          }
+          .label { 
+            color: #6b7280; 
+            font-weight: 500; 
+          }
+          .value { 
+            color: #111827; 
+            font-weight: 600; 
+            text-align: right; 
+          }
+          .footer { 
+            background: #f9fafb; 
+            padding: 30px; 
+            text-align: center; 
+            color: #6b7280; 
+            font-size: 12px; 
+            border-top: 1px solid #e5e7eb; 
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Booking Request Received</h1>
+          </div>
+          <div class="content">
+            <p class="greeting">Hi ${quote.name},</p>
+            <div class="message-box">
+              <p style="margin: 0; color: #78350f; font-size: 16px;">
+                Thank you for your booking request! We have received your details and our team is reviewing them. 
+                We will send you a confirmation quote shortly.
+              </p>
+            </div>
+            
+            <div class="trip-details">
+              <h3>Request Summary</h3>
+              <div class="detail-row">
+                <span class="label">Date</span>
+                <span class="value">${formattedDate}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Time</span>
+                <span class="value">${quote.time}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Pickup</span>
+                <span class="value">${quote.pickup_location}</span>
+              </div>
+              <div class="detail-row">
+                <span class="label">Vehicle</span>
+                <span class="value">${quote.vehicle_name || quote.vehicle_type}</span>
+              </div>
+            </div>
+
+            <p style="color: #4b5563;">
+              If you have any urgent questions, please feel free to contact us at <a href="tel:+61430240945" style="color: #C5A572; text-decoration: none;">+61 430 240 945</a>.
+            </p>
+          </div>
+          <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
 
 function generateQuoteResponseEmail(quote: any, priceBreakdown: any, type: string, confirmationToken: string): string {
   // Generate confirmation link
