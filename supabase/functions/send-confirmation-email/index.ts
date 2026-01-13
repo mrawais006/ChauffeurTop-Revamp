@@ -26,10 +26,8 @@ serve(async (req: Request) => {
     console.log(`Processing ${type} email for quote ${quote?.id}`);
 
     if (type === 'customer') {
-      // Send confirmation email to customer
       await sendCustomerConfirmation(RESEND_API_KEY, quote);
     } else if (type === 'admin') {
-      // Send notification to admin
       await sendAdminNotification(RESEND_API_KEY, quote);
     }
 
@@ -47,6 +45,21 @@ serve(async (req: Request) => {
   }
 });
 
+// Common Styles
+const styles = `
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; background-color: #f9fafb; }
+  .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden; }
+  .header { background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); padding: 30px 20px; text-align: center; }
+  .header h1 { color: #1A1F2C; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+  .content { padding: 40px 30px; }
+  .details-container { border: 1px solid #C5A572; border-radius: 8px; padding: 25px; margin: 25px 0; background-color: #ffffff; }
+  .details-title { color: #111827; margin: 0 0 20px 0; font-size: 20px; font-weight: 700; }
+  .info-line { margin: 8px 0; color: #4b5563; font-size: 15px; }
+  .info-label { font-weight: 600; color: #1f2937; }
+  .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; }
+  .cta-button { display: inline-block; background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); color: #1A1F2C; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 16px; margin: 20px 0; text-align: center; }
+`;
+
 async function sendCustomerConfirmation(apiKey: string, quote: any) {
   const emailHtml = `
     <!DOCTYPE html>
@@ -54,100 +67,67 @@ async function sendCustomerConfirmation(apiKey: string, quote: any) {
     <head>
       <meta charset="utf-8">
       <title>Booking Confirmed!</title>
+      <style>${styles}</style>
     </head>
-    <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f3f4f6;">
-      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+    <body>
+      <div class="container">
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 40px 20px; text-align: center;">
-          <div style="font-size: 60px; margin-bottom: 10px;">✅</div>
-          <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: bold;">Booking Confirmed!</h1>
-          <p style="color: #d1fae5; margin: 10px 0 0 0; font-size: 16px;">ChauffeurTop Premium Services</p>
+        <div class="header">
+          <h1>Booking Confirmed! ✅</h1>
         </div>
 
         <!-- Content -->
-        <div style="padding: 40px 30px;">
-          <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 24px;">Thank you, ${quote.name}!</h2>
+        <div class="content">
+          <p style="font-size: 18px; color: #1f2937; margin-bottom: 20px;">Dear ${quote.name},</p>
           
-          <p style="color: #4b5563; line-height: 1.6; margin: 0 0 20px 0;">
-            Your booking has been confirmed. We're excited to provide you with premium chauffeur service!
+          <p style="color: #4b5563; line-height: 1.6; margin-bottom: 25px;">
+            Your booking has been successfully confirmed. We are excited to provide you with our premium chauffeur service!
           </p>
 
-          <!-- Booking Reference -->
-          <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border: 2px solid #f59e0b;">
-            <p style="margin: 0; color: #92400e; font-size: 14px;">Booking Reference</p>
-            <p style="margin: 5px 0 0 0; color: #92400e; font-size: 24px; font-weight: bold; letter-spacing: 2px;">#${quote.id.substring(0, 8).toUpperCase()}</p>
+          <div style="text-align: center; padding: 20px; background: #fef3c7; border-radius: 8px; margin-bottom: 25px; border: 1px solid #C5A572;">
+            <p style="margin: 0; color: #92400e; font-size: 13px; text-transform: uppercase;">Booking Reference</p>
+            <p style="margin: 5px 0 0 0; color: #1f2937; font-size: 24px; font-weight: 800; letter-spacing: 1px;">#${quote.id.substring(0, 8).toUpperCase()}</p>
           </div>
 
           <!-- Trip Details -->
-          <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 20px 0; border-radius: 4px;">
-            <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 18px;">Your Trip Details</h3>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; color: #6b7280; width: 35%;">Date:</td>
-                <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #6b7280;">Pickup Time:</td>
-                <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${quote.time}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #6b7280;">Pickup Location:</td>
-                <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${quote.pickup_location}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #6b7280;">Dropoff Location:</td>
-                <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${quote.dropoff_location}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #6b7280;">Vehicle:</td>
-                <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${quote.vehicle_name}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #6b7280;">Passengers:</td>
-                <td style="padding: 8px 0; color: #1f2937; font-weight: 600;">${quote.passengers}</td>
-              </tr>
-              <tr>
-                <td style="padding: 12px 0 0 0; color: #6b7280; border-top: 1px solid #cbd5e1;">Total Amount:</td>
-                <td style="padding: 12px 0 0 0; color: #d97706; font-weight: bold; font-size: 20px; border-top: 1px solid #cbd5e1;">$${quote.quoted_price.toFixed(2)}</td>
-              </tr>
-            </table>
+          <div class="details-container">
+            <h2 class="details-title">Your Trip Details</h2>
+            
+            <p class="info-line"><span class="info-label">Date:</span> ${new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p class="info-line"><span class="info-label">Time:</span> ${quote.time}</p>
+            <p class="info-line"><span class="info-label">Pickup:</span> ${quote.pickup_location}</p>
+            <p class="info-line"><span class="info-label">Destination:</span> ${quote.destinations?.[0] || quote.dropoff_location || 'As instructed'}</p>
+            
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+               <p class="info-line"><span class="info-label">Vehicle:</span> ${quote.vehicle_name}</p>
+               <p class="info-line"><span class="info-label">Passengers:</span> ${quote.passengers}</p>
+            </div>
+            
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
+               <span class="info-label" style="font-size: 16px;">Total Paid</span>
+               <span style="font-size: 20px; font-weight: 800; color: #C5A572;">$${quote.quoted_price.toFixed(2)}</span>
+            </div>
           </div>
 
           <!-- What's Next -->
-          <div style="background-color: #f0fdf4; padding: 20px; border-radius: 8px; margin: 30px 0; border: 1px solid #86efac;">
-            <h3 style="margin: 0 0 15px 0; color: #166534; font-size: 18px;">What Happens Next?</h3>
-            <ul style="margin: 0; padding-left: 20px; color: #166534;">
-              <li style="margin-bottom: 10px;">We'll contact you 24 hours before your pickup to confirm details</li>
-              <li style="margin-bottom: 10px;">Your chauffeur will arrive 10 minutes before scheduled time</li>
-              <li style="margin-bottom: 10px;">Payment can be made after service via bank transfer or cash</li>
-              <li>You'll receive a reminder SMS on the day of your booking</li>
+          <div style="background-color: #fdfbf7; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #e7e5e4;">
+            <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 700;">What Happens Next?</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #4b5563;">
+              <li style="margin-bottom: 8px;">We'll contact you 24 hours before your pickup to confirm details</li>
+              <li style="margin-bottom: 8px;">Your chauffeur will arrive 10 minutes before scheduled time</li>
+              <li style="margin-bottom: 8px;">You'll receive a reminder SMS on the day</li>
             </ul>
           </div>
 
-          <!-- Contact Info -->
-          <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 30px 0;">
-            <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 16px;">Need to Make Changes?</h3>
-            <p style="color: #6b7280; margin: 0 0 10px 0; font-size: 14px;">
-              📞 Phone: <a href="tel:+61412345678" style="color: #3b82f6; text-decoration: none; font-weight: 600;">+61 412 345 678</a>
-            </p>
-            <p style="color: #6b7280; margin: 0; font-size: 14px;">
-              ✉️ Email: <a href="mailto:bookings@chauffeurtop.com.au" style="color: #3b82f6; text-decoration: none; font-weight: 600;">bookings@chauffeurtop.com.au</a>
-            </p>
+          <div style="text-align: center; margin-top: 30px;">
+            <p style="color: #6b7280; font-size: 14px;">Need to make changes?</p>
+            <p><strong><a href="tel:+61430240945" style="color: #C5A572; text-decoration: none;">+61 430 240 945</a></strong></p>
           </div>
-
-          <p style="color: #4b5563; line-height: 1.6; margin: 20px 0 0 0;">
-            We look forward to serving you!
-          </p>
-          <p style="color: #4b5563; line-height: 1.6; margin: 5px 0 0 0; font-weight: 600;">
-            The ChauffeurTop Team
-          </p>
         </div>
 
         <!-- Footer -->
-        <div style="background-color: #f9fafb; padding: 20px; text-align: center; border-top: 1px solid #e5e7eb;">
-          <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-            © ${new Date().getFullYear()} ChauffeurTop. All rights reserved.
-          </p>
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} ChauffeurTop. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -181,177 +161,59 @@ async function sendAdminNotification(apiKey: string, quote: any) {
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>New Booking Confirmation</title>
-      <style>
-        body { 
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-          line-height: 1.6; 
-          color: #1f2937; 
-          margin: 0;
-          padding: 0;
-          background-color: #f9fafb;
-        }
-        .container { 
-          max-width: 600px; 
-          margin: 0 auto; 
-          background: #ffffff;
-        }
-        .header { 
-          background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); 
-          padding: 40px 30px; 
-          text-align: center;
-        }
-        .header h1 { 
-          color: #1A1F2C; 
-          margin: 0; 
-          font-size: 28px; 
-          font-weight: 700;
-          letter-spacing: -0.5px;
-        }
-        .content { 
-          padding: 40px 30px; 
-        }
-        .section-box {
-          background: #f9fafb;
-          border-left: 4px solid #C5A572;
-          padding: 20px;
-          margin: 25px 0;
-          border-radius: 4px;
-        }
-        .section-box h3 {
-          margin: 0 0 15px 0;
-          color: #1f2937;
-          font-size: 18px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-        .detail-row {
-          display: flex;
-          justify-content: space-between;
-          border-bottom: 1px solid #e5e7eb;
-          padding: 8px 0;
-        }
-        .detail-row:last-child {
-          border-bottom: none;
-        }
-        .detail-label {
-          color: #6b7280;
-          font-weight: 500;
-        }
-        .detail-value {
-          color: #111827;
-          font-weight: 600;
-          text-align: right;
-        }
-        .price-tag {
-          background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%);
-          color: #1A1F2C;
-          padding: 15px;
-          text-align: center;
-          font-weight: bold;
-          font-size: 24px;
-          border-radius: 8px;
-          margin-top: 20px;
-        }
-        .cta-button { 
-          display: inline-block; 
-          background: #111827;
-          color: #C5A572 !important; 
-          padding: 16px 32px; 
-          text-decoration: none; 
-          border-radius: 4px; 
-          font-weight: 700;
-          font-size: 16px;
-          margin: 25px 0;
-          text-align: center;
-          display: block;
-        }
-        .footer {
-          background: #f9fafb;
-          padding: 30px;
-          text-align: center;
-          color: #6b7280;
-          font-size: 12px;
-          border-top: 1px solid #e5e7eb;
-        }
-      </style>
+      <style>${styles}</style>
     </head>
     <body>
       <div class="container">
         <!-- Header -->
         <div class="header">
-          <h1>🎉 New Booking Confirmed</h1>
-          <p style="margin: 10px 0 0 0; color: #1A1F2C; font-weight: 500;">
-            Ref: #${quote.id.substring(0, 8).toUpperCase()}
-          </p>
+          <h1>New Booking Confirmed 🔔</h1>
         </div>
 
         <div class="content">
+          <div style="text-align: center; margin-bottom: 25px;">
+             <span style="background: #1f2937; color: #C5A572; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 14px;">REF: #${quote.id.substring(0, 8).toUpperCase()}</span>
+          </div>
+
           <!-- Customer Details -->
-          <div class="section-box">
-            <h3>👤 Customer Details</h3>
-            <div class="detail-row">
-              <span class="detail-label">Name</span>
-              <span class="detail-value">${quote.name}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Email</span>
-              <span class="detail-value"><a href="mailto:${quote.email}" style="color: #111827; text-decoration: none;">${quote.email}</a></span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Phone</span>
-              <span class="detail-value"><a href="tel:${quote.phone}" style="color: #111827; text-decoration: none;">${quote.phone}</a></span>
-            </div>
+          <div class="details-container" style="background: #fdfbf7;">
+            <h3 class="details-title" style="font-size: 18px;">👤 Customer Details</h3>
+            <p class="info-line"><span class="info-label">Name:</span> ${quote.name}</p>
+            <p class="info-line"><span class="info-label">Email:</span> <a href="mailto:${quote.email}" style="color: #1f2937;">${quote.email}</a></p>
+            <p class="info-line"><span class="info-label">Phone:</span> <a href="tel:${quote.phone}" style="color: #1f2937;">${quote.phone}</a></p>
           </div>
 
           <!-- Trip Details -->
-          <div class="section-box">
-            <h3>🚗 Trip Information</h3>
-            <div class="detail-row">
-              <span class="detail-label">Date</span>
-              <span class="detail-value">${new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
+          <div class="details-container">
+            <h3 class="details-title" style="font-size: 18px;">🚗 Trip Information</h3>
+            <p class="info-line"><span class="info-label">Date:</span> ${new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</p>
+            <p class="info-line"><span class="info-label">Time:</span> ${quote.time}</p>
+            
+            <div style="background-color: #fdfbf7; border: 1px solid #e5e5e5; padding: 15px; border-radius: 6px; margin: 15px 0;">
+                <p class="info-line"><span class="info-label">Pickup:</span> ${quote.pickup_location}</p>
+                <p class="info-line"><span class="info-label">Dropoff:</span> ${quote.dropoff_location || quote.destinations?.[0] || 'As discussed'}</p>
             </div>
-            <div class="detail-row">
-              <span class="detail-label">Time</span>
-              <span class="detail-value">${quote.time}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Vehicle</span>
-              <span class="detail-value">${quote.vehicle_name}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Passengers</span>
-              <span class="detail-value">${quote.passengers}</span>
-            </div>
-          </div>
 
-          <!-- Locations -->
-          <div class="section-box">
-            <h3>📍 Route</h3>
-            <div style="margin-bottom: 15px;">
-              <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Pickup</div>
-              <div style="font-weight: 600; color: #111827;">${quote.pickup_location}</div>
+            <p class="info-line"><span class="info-label">Vehicle:</span> ${quote.vehicle_name}</p>
+            <p class="info-line"><span class="info-label">Passengers:</span> ${quote.passengers}</p>
+            
+             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb; text-align: center;">
+               <span class="info-label" style="display: block; font-size: 12px; text-transform: uppercase;">Quoted Price</span>
+               <span style="font-size: 24px; font-weight: 800; color: #C5A572;">$${quote.quoted_price.toFixed(2)}</span>
             </div>
-            <div>
-              <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Dropoff</div>
-              <div style="font-weight: 600; color: #111827;">${quote.dropoff_location || quote.destinations?.[0] || 'As discussed'}</div>
-            </div>
-          </div>
-
-          <!-- Price -->
-          <div class="price-tag">
-            $${quote.quoted_price.toFixed(2)}
           </div>
 
           <!-- Action -->
-          <a href="${SITE_URL}/admin" class="cta-button">
-            VIEW IN ADMIN PANEL
-          </a>
+          <div style="text-align: center;">
+            <a href="${SITE_URL}/admin" class="cta-button">
+              VIEW IN ADMIN PANEL
+            </a>
+          </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-          <p>This is an automated notification from ChauffeurTop.</p>
-          <p>© ${new Date().getFullYear()} ChauffeurTop. All rights reserved.</p>
+          <p>Automated Notification Service</p>
         </div>
       </div>
     </body>
@@ -366,7 +228,7 @@ async function sendAdminNotification(apiKey: string, quote: any) {
     },
     body: JSON.stringify({
       from: 'ChauffeurTop Admin <notifications@chauffeurtop.com.au>',
-      to: ['bookings@chauffeurtop.com.au'], // Updated to correct admin email
+      to: ['bookings@chauffeurtop.com.au'],
       subject: `New Booking: ${quote.name} - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
       html: emailHtml,
     }),

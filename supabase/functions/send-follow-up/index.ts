@@ -121,13 +121,18 @@ serve(async (req: Request) => {
 // Common Styles for Consistency
 const styles = `
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; background-color: #f9fafb; }
-  .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
-  .header { background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); padding: 40px 30px; text-align: center; }
-  .header h1 { color: #1A1F2C; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden; }
+  .header { background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); padding: 30px 20px; text-align: center; }
+  .header h1 { color: #1A1F2C; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
   .content { padding: 40px 30px; }
-  .section-box { background: #f9fafb; border-left: 4px solid #C5A572; padding: 20px; margin: 25px 0; border-radius: 4px; }
-  .price-box { background: linear-gradient(135deg, #111827 0%, #374151 100%); color: #C5A572; padding: 20px; text-align: center; border-radius: 8px; margin: 30px 0; }
-  .cta-button { display: inline-block; background: #111827; color: #C5A572 !important; padding: 16px 32px; text-decoration: none; border-radius: 4px; font-weight: 700; font-size: 16px; margin: 25px 0; text-align: center; display: block; }
+  
+  .details-container { border: 1px solid #C5A572; border-radius: 8px; padding: 25px; margin: 25px 0; background-color: #ffffff; }
+  .details-title { color: #111827; margin: 0 0 20px 0; font-size: 20px; font-weight: 700; }
+  .info-line { margin: 8px 0; color: #4b5563; font-size: 15px; }
+  .info-label { font-weight: 600; color: #1f2937; }
+
+  .price-box { background: linear-gradient(135deg, #111827 0%, #374151 100%); color: #C5A572; padding: 30px; text-align: center; border-radius: 8px; margin: 30px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  .cta-button { display: inline-block; background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); color: #1A1F2C !important; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 16px; margin: 25px 0; text-align: center; display: block; box-shadow: 0 4px 6px rgba(197, 165, 114, 0.3); }
   .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; }
   .link { color: #111827; text-decoration: none; font-weight: 600; }
 `;
@@ -144,23 +149,26 @@ function buildReminderEmail(lead: any, confirmationUrl: string | null): string {
     <body>
       <div class="container">
         <div class="header">
-          <h1>ChauffeurTop</h1>
+          <h1>ChauffeurTop Reminder</h1>
         </div>
 
         <div class="content">
-          <h2>Hi ${lead.name},</h2>
+          <p style="font-size: 18px; color: #1f2937; margin-bottom: 20px;">Hi ${lead.name},</p>
           
           <p>We wanted to follow up on the quote we sent you for your upcoming trip on <strong>${new Date(lead.date).toLocaleDateString('en-AU')}</strong>.</p>
           
           <div class="price-box">
              <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; color: #9CA3AF;">Your Quote</div>
-             <div style="font-size: 32px; font-weight: 700;">$${lead.quoted_price.toFixed(2)}</div>
+             <div style="font-size: 36px; font-weight: 700;">$${lead.quoted_price.toFixed(2)}</div>
           </div>
 
-          <div class="section-box">
-            <h3 style="margin: 0 0 10px 0; color: #111827; font-size: 16px;">Trip Details</h3>
-            <p><strong>Pickup:</strong> ${lead.pickup_location}</p>
-            <p><strong>Dropoff:</strong> ${lead.dropoff_location || 'As instructed'}</p>
+          <div class="details-container">
+            <h3 class="details-title">Trip Details</h3>
+            <p class="info-line"><span class="info-label">Pickup:</span> ${lead.pickup_location}</p>
+            <p class="info-line"><span class="info-label">Dropoff:</span> ${lead.dropoff_location || 'As instructed'}</p>
+            <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
+                <p class="info-line"><span class="info-label">Vehicle:</span> ${lead.vehicle_name || lead.vehicle_type}</p>
+            </div>
           </div>
 
           ${confirmationUrl ? `
@@ -169,14 +177,14 @@ function buildReminderEmail(lead: any, confirmationUrl: string | null): string {
             </a>
           ` : ''}
 
-          <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
+          <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 30px;">
             If you have any questions or would like to make changes, please don't hesitate to contact us.
           </p>
 
           <div class="footer">
-            <p>
-              📞 <a href="tel:+61412345678" class="link">+61 412 345 678</a><br>
-              ✉️ <a href="mailto:bookings@chauffeurtop.com.au" class="link">bookings@chauffeurtop.com.au</a>
+             <p>
+              📞 <a href="tel:+61430240945" class="link">+61 430 240 945</a><br>
+              ✉️ <a href="mailto:admin@chauffeurtop.com.au" class="link">admin@chauffeurtop.com.au</a>
             </p>
             <p>© ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
           </div>
@@ -208,7 +216,7 @@ function buildDiscountEmail(lead: any, discount: any, newPrice: number, confirma
         </div>
 
         <div class="content">
-          <h2>Hi ${lead.name},</h2>
+          <p style="font-size: 18px; color: #1f2937; margin-bottom: 20px;">Hi ${lead.name},</p>
           
           <p>We'd love to have you as our customer! We're offering you a special <strong>${discountText} discount</strong> on your booking.</p>
 
@@ -217,15 +225,15 @@ function buildDiscountEmail(lead: any, discount: any, newPrice: number, confirma
             <div style="font-size: 20px; text-decoration: line-through; margin-bottom: 15px; color: #6B7280;">$${lead.quoted_price.toFixed(2)}</div>
             
             <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; color: #fff;">Your Discounted Price</div>
-            <div style="font-size: 36px; font-weight: 700; color: #C5A572;">$${newPrice.toFixed(2)}</div>
-            <div style="margin-top: 10px; color: #10B981; font-weight: 600;">You save $${(lead.quoted_price - newPrice).toFixed(2)}!</div>
+            <div style="font-size: 40px; font-weight: 700; color: #C5A572;">$${newPrice.toFixed(2)}</div>
+            <div style="margin-top: 10px; color: #10B981; font-weight: 600; background: rgba(16, 185, 129, 0.1); display: inline-block; padding: 4px 12px; border-radius: 20px;">You save $${(lead.quoted_price - newPrice).toFixed(2)}!</div>
           </div>
 
-          <div class="section-box">
-             <h3 style="margin: 0 0 10px 0; color: #111827; font-size: 16px;">Trip Details</h3>
-             <p><strong>Date:</strong> ${new Date(lead.date).toLocaleDateString('en-AU')}</p>
-             <p><strong>Pickup:</strong> ${lead.pickup_location}</p>
-             <p><strong>Dropoff:</strong> ${lead.dropoff_location || 'As instructed'}</p>
+          <div class="details-container">
+             <h3 class="details-title">Trip Details</h3>
+             <p class="info-line"><span class="info-label">Date:</span> ${new Date(lead.date).toLocaleDateString('en-AU')}</p>
+             <p class="info-line"><span class="info-label">Pickup:</span> ${lead.pickup_location}</p>
+             <p class="info-line"><span class="info-label">Dropoff:</span> ${lead.dropoff_location || 'As instructed'}</p>
           </div>
 
           ${confirmationUrl ? `
@@ -237,10 +245,10 @@ function buildDiscountEmail(lead: any, discount: any, newPrice: number, confirma
             </p>
           ` : ''}
 
-          <div class="footer">
-            <p>
-              📞 <a href="tel:+61412345678" class="link">+61 412 345 678</a><br>
-              ✉️ <a href="mailto:bookings@chauffeurtop.com.au" class="link">bookings@chauffeurtop.com.au</a>
+           <div class="footer">
+             <p>
+              📞 <a href="tel:+61430240945" class="link">+61 430 240 945</a><br>
+              ✉️ <a href="mailto:admin@chauffeurtop.com.au" class="link">admin@chauffeurtop.com.au</a>
             </p>
             <p>© ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
           </div>
@@ -267,19 +275,19 @@ function buildPersonalEmail(lead: any, message: string, confirmationUrl: string 
         </div>
 
         <div class="content">
-          <h2>Hi ${lead.name},</h2>
+          <p style="font-size: 18px; color: #1f2937; margin-bottom: 20px;">Hi ${lead.name},</p>
           
-          <div style="background-color: #f3f4f6; padding: 25px; border-radius: 8px; margin: 20px 0; font-style: italic; border-left: 4px solid #111827;">
+          <div style="background-color: #f3f4f6; padding: 25px; border-radius: 8px; margin: 20px 0; font-style: italic; border-left: 4px solid #111827; color: #4b5563;">
             "${message}"
           </div>
 
-          <div class="section-box">
-            <h3 style="margin: 0 0 10px 0; color: #111827; font-size: 16px;">Booking Details</h3>
-            <p><strong>Date:</strong> ${new Date(lead.date).toLocaleDateString('en-AU')}</p>
-            <p><strong>Time:</strong> ${lead.time}</p>
-            <p><strong>Pickup:</strong> ${lead.pickup_location}</p>
-            <p><strong>Dropoff:</strong> ${lead.dropoff_location || 'As instructed'}</p>
-            ${lead.quoted_price ? `<p style="margin-top: 10px;"><strong>Price:</strong> $${lead.quoted_price.toFixed(2)}</p>` : ''}
+          <div class="details-container">
+            <h3 class="details-title">Booking Details</h3>
+            <p class="info-line"><span class="info-label">Date:</span> ${new Date(lead.date).toLocaleDateString('en-AU')}</p>
+            <p class="info-line"><span class="info-label">Time:</span> ${lead.time}</p>
+            <p class="info-line"><span class="info-label">Pickup:</span> ${lead.pickup_location}</p>
+            <p class="info-line"><span class="info-label">Dropoff:</span> ${lead.dropoff_location || 'As instructed'}</p>
+            ${lead.quoted_price ? `<p class="info-line" style="margin-top: 15px; font-size: 16px;"><span class="info-label">Price:</span> $${lead.quoted_price.toFixed(2)}</p>` : ''}
           </div>
 
           ${confirmationUrl ? `
@@ -288,10 +296,10 @@ function buildPersonalEmail(lead: any, message: string, confirmationUrl: string 
             </a>
           ` : ''}
 
-          <div class="footer">
-            <p>
-              📞 <a href="tel:+61412345678" class="link">+61 412 345 678</a><br>
-              ✉️ <a href="mailto:bookings@chauffeurtop.com.au" class="link">bookings@chauffeurtop.com.au</a>
+           <div class="footer">
+             <p>
+              📞 <a href="tel:+61430240945" class="link">+61 430 240 945</a><br>
+              ✉️ <a href="mailto:admin@chauffeurtop.com.au" class="link">admin@chauffeurtop.com.au</a>
             </p>
             <p>© ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
           </div>
