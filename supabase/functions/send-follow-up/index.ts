@@ -99,6 +99,65 @@ serve(async (req: Request) => {
 
     const result = await emailResponse.json();
 
+    // -----------------------------
+    // Send SMS Notification via Twilio
+    // -----------------------------
+    try {
+      const TWILIO_ACCOUNT_SID = Deno.env.get('TWILIO_ACCOUNT_SID');
+      const TWILIO_AUTH_TOKEN = Deno.env.get('TWILIO_AUTH_TOKEN');
+      const TWILIO_PHONE_NUMBER = Deno.env.get('TWILIO_PHONE_NUMBER');
+
+      if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER && lead.phone) {
+        console.log('Sending follow-up SMS to:', lead.phone);
+
+        let smsBody = '';
+        const safeId = lead.id.substring(0, 8).toUpperCase();
+
+        switch (followUpType) {
+          case 'reminder':
+            smsBody = `ChauffeurTop Reminder 🗓️\nHi ${lead.name}, friendly reminder about your quote #${safeId} ($${lead.quoted_price.toFixed(0)}).\nCheck your email to confirm.`;
+            break;
+          case 'discount':
+             const discountStr = discount.type === 'percentage' ? `${discount.value}%` : `$${discount.value}`;
+             smsBody = `ChauffeurTop Exlusive 🎁\nHi ${lead.name}, special offer! Get ${discountStr} OFF your booking #${safeId}.\nNew Price: $${updatedPrice.toFixed(0)}.\nCheck your email to claim!`;
+            break;
+          case 'personal':
+            smsBody = `Message from ChauffeurTop 💬\nre: Booking #${safeId}\nPlease check your email for an important update regarding your inquiry.`;
+            break;
+        }
+
+        if (smsBody) {
+            const params = new URLSearchParams();
+            params.append('To', lead.phone);
+            params.append('From', TWILIO_PHONE_NUMBER);
+            params.append('Body', smsBody);
+
+            const twilioRes = await fetch(
+              `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'Authorization': `Basic ${btoa(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`)}`,
+                },
+                body: params,
+              }
+            );
+
+            if (!twilioRes.ok) {
+              const twilioError = await twilioRes.text();
+              console.error('Twilio SMS failed:', twilioError);
+            } else {
+              console.log('Twilio SMS sent successfully');
+            }
+        }
+      }
+    } catch (smsError) {
+      console.error('Error sending SMS:', smsError);
+      // Non-blocking
+    }
+    console.log('Follow-up activity completed');
+
     return new Response(
       JSON.stringify({
         success: true,
