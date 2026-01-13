@@ -31,6 +31,12 @@ export default function ConfirmBookingPage() {
     );
 
     useEffect(() => {
+        // If we already have the status from URL params (trusted from API), skip fetch
+        if (success || alreadyConfirmed) {
+            setLoading(false);
+            return;
+        }
+
         const fetchQuoteDetails = async () => {
             try {
                 // Try to fetch quote by token first (if not yet confirmed)
@@ -72,7 +78,7 @@ export default function ConfirmBookingPage() {
         };
 
         fetchQuoteDetails();
-    }, [token, supabase]);
+    }, [token, supabase, success, alreadyConfirmed]);
 
     // Loading State
     if (loading) {
@@ -94,8 +100,8 @@ export default function ConfirmBookingPage() {
         );
     }
 
-    // Error State
-    if (error || !quote) {
+    // Error State - Only show if we don't have a trusted success flag AND we failed to fetch data
+    if ((!success && !alreadyConfirmed) && (error || !quote)) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex flex-col justify-center py-12 sm:px-6 lg:px-8 overflow-x-hidden">
                 {/* Decorative background elements */}
@@ -108,7 +114,7 @@ export default function ConfirmBookingPage() {
                     <div className="bg-black/50 backdrop-blur-md py-12 px-8 shadow-2xl sm:rounded-xl border border-red-500/30 text-center">
                         <AlertCircle className="h-16 w-16 text-red-400 mx-auto mb-6" />
                         <h1 className="text-2xl font-serif font-bold text-white mb-3">Booking Not Found</h1>
-                        <p className="text-gray-400 mb-8 text-sm">{error}</p>
+                        <p className="text-gray-400 mb-8 text-sm">{error || 'Unable to access booking details.'}</p>
                         <Link href="/">
                             <button className="w-full bg-luxury-gold text-luxury-black hover:bg-white hover:text-black font-bold uppercase tracking-widest py-4 px-6 rounded-sm transition-all duration-300 shadow-lg hover:shadow-xl text-xs">
                                 Return to Homepage
@@ -120,7 +126,7 @@ export default function ConfirmBookingPage() {
         );
     }
 
-    const isAlreadyConfirmed = alreadyConfirmed || quote.status === 'confirmed' || quote.status === 'completed';
+    const isAlreadyConfirmed = alreadyConfirmed || quote?.status === 'confirmed' || quote?.status === 'completed';
 
     // Success State
     return (
