@@ -97,6 +97,48 @@ export async function GET(request: NextRequest) {
             // Don't fail the confirmation if email fails
         }
 
+        // -----------------------------
+        // Send SMS Confirmation via Twilio
+        // -----------------------------
+        try {
+            const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
+            const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+            const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
+
+            if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER && quote.phone) {
+                console.log('[Confirm Booking] Sending confirmation SMS to:', quote.phone);
+
+                const smsBody = `Booking Confirmed! ✅\nHi ${quote.name}, your ChauffeurTop booking for ${new Date(quote.date).toLocaleDateString('en-AU')} is confirmed. We will contact you 24hrs before pickup. Ref: #${quote.id.substring(0, 8).toUpperCase()}`;
+
+                const params = new URLSearchParams();
+                params.append('To', quote.phone);
+                params.append('From', TWILIO_PHONE_NUMBER);
+                params.append('Body', smsBody);
+
+                const twilioRes = await fetch(
+                    `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Authorization': `Basic ${Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64')}`,
+                        },
+                        body: params,
+                    }
+                );
+
+                if (!twilioRes.ok) {
+                    const twilioError = await twilioRes.text();
+                    console.error('[Confirm Booking] Twilio SMS failed:', twilioError);
+                } else {
+                    console.log('[Confirm Booking] Twilio SMS sent successfully');
+                }
+            }
+        } catch (smsError) {
+            console.error('[Confirm Booking] Error sending SMS:', smsError);
+            // Non-blocking error
+        }
+
         console.log('[Confirm Booking] Success:', quote.id);
 
         // Handle Split Booking for Return Trips
