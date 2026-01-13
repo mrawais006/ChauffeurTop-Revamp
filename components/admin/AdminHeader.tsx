@@ -1,13 +1,14 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { LogOut, RefreshCw } from 'lucide-react';
+import { LogOut, RefreshCw, Menu } from 'lucide-react';
 import { RealtimeStatus } from './RealtimeStatus';
 
 interface AdminHeaderProps {
   userEmail: string | null;
   onLogout: () => void;
   onRefresh?: () => void;
+  onToggleSidebar?: () => void;
 }
 
 // Helper to extract first name from email
@@ -28,22 +29,30 @@ function getFirstName(email: string | null): string {
   return 'Admin';
 }
 
-export default function AdminHeader({ userEmail, onLogout, onRefresh }: AdminHeaderProps) {
+export default function AdminHeader({ userEmail, onLogout, onRefresh, onToggleSidebar }: AdminHeaderProps) {
   const firstName = getFirstName(userEmail);
   
   return (
-    <div className="flex justify-between items-start mb-6">
+    <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Admin Portal</h1>
+        <div className="flex items-center gap-3">
+          {onToggleSidebar && (
+            <Button variant="ghost" size="icon" className="lg:hidden text-black hover:bg-gray-100" onClick={onToggleSidebar}>
+              <Menu className="w-6 h-6" />
+            </Button>
+          )}
+          <h1 className="text-2xl font-serif font-bold text-gray-900">Dashboard</h1>
+        </div>
         <div className="flex items-center gap-3 mt-1">
-          <p className="text-sm text-amber-600">
-            Hi, <span className="font-semibold">{firstName}</span>
+          <p className="text-gray-500">
+            Welcome back, {userEmail?.split('@')[0] || 'Admin'}
           </p>
+          <div className="hidden md:block h-4 w-px bg-gray-300"></div>
           <RealtimeStatus />
         </div>
       </div>
       
-      <div className="flex gap-3">
+      <div className="flex items-center gap-3">
         {onRefresh && (
           <button
             onClick={onRefresh}
@@ -64,7 +73,6 @@ export default function AdminHeader({ userEmail, onLogout, onRefresh }: AdminHea
           <LogOut className="h-4 w-4" strokeWidth={1.5} />
         </button>
       </div>
-    </div>
+    </header>
   );
 }
-

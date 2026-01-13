@@ -16,10 +16,21 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) {
+    // Check if we just logged out to prevent redirect loop
+    const params = new URLSearchParams(window.location.search);
+    const isLogoutAction = params.get('action') === 'logout';
+
+    if (user && !loading && !isLogoutAction) {
       router.push('/admin');
+    } else if (user && isLogoutAction) {
+        // If we have a user but just logged out, it's a ghost session.
+        // Silently clear it or just ignore it for now to let them log in again.
+        console.warn('[LoginPage] Ghost session detected after logout. Ignoring redirect.');
+        // Optional: Force another sign out if needed, but for now just staying on login page is safer.
+        // We could also clear the URL param to clean up state
+        window.history.replaceState({}, '', '/login');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,15 +38,18 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
-      // Redirect will happen via useAuth hook
-      router.push('/admin');
+      console.log('[Login] Attempting sign in...');
+      const { user, session } = await signIn(email, password);
+      console.log('[Login] Sign in successful', { user, session });
+      
+      // Force hard navigation to ensure clean state
+      window.location.href = '/admin';
     } catch (err: any) {
       console.error('[Login] Error:', err);
       setError(err.message || 'Invalid email or password');
-    } finally {
       setLoading(false);
     }
+    // Note: We don't verify loading state here because if success, we redirect hard.
   };
 
   return (
