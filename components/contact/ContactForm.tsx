@@ -27,7 +27,7 @@ const ContactForm = () => {
         {
             icon: <MapPin className="w-6 h-6" />,
             title: "Location",
-            content: "Melbourne, Victoria"
+            content: "3/199 Greenvale Dr, Greenvale, VIC 3059"
         },
         {
             icon: <Clock className="w-6 h-6" />,

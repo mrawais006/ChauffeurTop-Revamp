@@ -110,7 +110,7 @@ export function Footer() {
                                     <div className="p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-luxury-gold/50 transition-colors shrink-0">
                                         <MapPin className="text-luxury-gold" size={16} />
                                     </div>
-                                    <span className="leading-relaxed">123 Luxury Lane, Melbourne,<br />Victoria 3000, Australia</span>
+                                    <span className="leading-relaxed">3/199 Greenvale Dr, Greenvale,<br />VIC 3059, Australia</span>
                                 </li>
                                 <li className="flex items-center gap-4 group">
                                     <div className="p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-luxury-gold/50 transition-colors shrink-0">
