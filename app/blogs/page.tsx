@@ -11,6 +11,9 @@ export const revalidate = 60; // Revalidate every minute
 export const metadata = {
   title: 'Our Blog | Chauffeur Top Melbourne',
   description: 'Latest news, travel tips, and insights from Melbourne\'s premier chauffeur service.',
+  alternates: {
+    canonical: 'https://chauffeurtop.com.au/blogs',
+  },
 };
 
 export default async function BlogsPage() {

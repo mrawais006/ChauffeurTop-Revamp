@@ -1,29 +1,21 @@
-"use client"
+import type { Metadata } from "next";
+import HomeContent from "./HomeContent";
 
-import { Navbar } from "@/components/layout/Navbar";
-import { HeroSection } from "@/components/home/HeroSection";
-import { IntroductionSection } from "@/components/home/IntroductionSection";
-import { FourPillars } from "@/components/home/FourPillars";
-import { ServicesGrid } from "@/components/home/ServicesGrid";
-import { VehicleFleet } from "@/components/home/VehicleFleet";
-import { ReviewsSection } from "@/components/home/ReviewsSection";
-import { InformationSection } from "@/components/home/InformationSection";
-import { FAQSection } from "@/components/home/FAQSection";
-import { CTASection } from "@/components/home/CTASection";
+export const metadata: Metadata = {
+  title: "ChauffeurTop | Premium Melbourne Chauffeur Service & Airport Transfers",
+  description: "Melbourne's premier luxury chauffeur service. Professional airport transfers, corporate travel, wedding transport & executive car hire. Book your premium chauffeur today.",
+  keywords: ["chauffeur melbourne", "airport transfer melbourne", "corporate chauffeur", "luxury car hire melbourne", "wedding car melbourne", "executive chauffeur service"],
+  alternates: {
+    canonical: "https://chauffeurtop.com.au",
+  },
+  openGraph: {
+    title: "ChauffeurTop | Premium Melbourne Chauffeur Service",
+    description: "Melbourne's premier luxury chauffeur service. Professional airport transfers, corporate travel & executive car hire.",
+    url: "https://chauffeurtop.com.au",
+    type: "website",
+  },
+};
 
 export default function Home() {
-  return (
-    <main className="min-h-screen relative bg-luxury-black text-white selection:bg-luxury-gold selection:text-black">
-      <Navbar />
-      <HeroSection />
-      <IntroductionSection />
-      <FourPillars />
-      <ServicesGrid />
-      <VehicleFleet />
-      <ReviewsSection />
-      <InformationSection />
-      <FAQSection />
-      <CTASection />
-    </main>
-  );
+  return <HomeContent />;
 }

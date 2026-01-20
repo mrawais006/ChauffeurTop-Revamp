@@ -3,6 +3,9 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
     title: 'Terms and Conditions | ChauffeurTop',
     description: 'Terms and Conditions for ChauffeurTop - Review our service agreement, booking policies, payment terms, and service standards for luxury chauffeur services in Melbourne.',
+    alternates: {
+        canonical: 'https://chauffeurtop.com.au/terms-and-conditions',
+    },
 };
 
 export default function TermsAndConditionsPage() {

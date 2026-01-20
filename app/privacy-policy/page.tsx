@@ -3,6 +3,9 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
     title: 'Privacy Policy | ChauffeurTop',
     description: 'Privacy Policy for ChauffeurTop - Learn how we collect, use, and protect your personal information in accordance with Australian Privacy Principles.',
+    alternates: {
+        canonical: 'https://chauffeurtop.com.au/privacy-policy',
+    },
 };
 
 export default function PrivacyPolicyPage() {

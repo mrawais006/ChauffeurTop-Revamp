@@ -1,7 +1,23 @@
+import type { Metadata } from "next";
 import BookingForm from "@/components/booking/BookingForm";
 import { ServiceHero } from "@/components/services/ServiceHero";
 import { Phone, Mail, ShieldCheck, Gem, Clock, Star } from "lucide-react";
 import { CTASection } from "@/components/home/CTASection";
+
+export const metadata: Metadata = {
+  title: "Book Your Chauffeur | Get a Quote - ChauffeurTop Melbourne",
+  description: "Request a personalized quote for Melbourne's premier chauffeur service. Airport transfers, corporate travel, weddings & more. Instant quotes, transparent pricing.",
+  keywords: ["book chauffeur melbourne", "chauffeur quote", "luxury car hire booking", "airport transfer booking melbourne"],
+  alternates: {
+    canonical: "https://chauffeurtop.com.au/booking",
+  },
+  openGraph: {
+    title: "Book Your Chauffeur | ChauffeurTop Melbourne",
+    description: "Request a personalized quote for Melbourne's premier chauffeur service.",
+    url: "https://chauffeurtop.com.au/booking",
+    type: "website",
+  },
+};
 
 export default function BookingPage() {
     return (
