@@ -1,14 +1,14 @@
 'use client';
 
 import { cn } from '@/lib/utils';
-import { BookOpen, Calendar, Menu, X } from 'lucide-react';
+import { BookOpen, Calendar, Menu, X, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 
 interface AdminSidebarProps {
-  activeTab: 'bookings' | 'blogs';
-  onTabChange: (tab: 'bookings' | 'blogs') => void;
+  activeTab: 'bookings' | 'blogs' | 'marketing';
+  onTabChange: (tab: 'bookings' | 'blogs' | 'marketing') => void;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
@@ -78,6 +78,26 @@ export function AdminSidebar({ activeTab, onTabChange, isOpen, setIsOpen }: Admi
               <BookOpen className={cn("w-5 h-5 mr-3", activeTab === 'blogs' ? "text-black" : "text-luxury-gold")} />
               Blogs
             </Button>
+
+            {/* Marketing Tab - Only for Admin */}
+            {user?.role !== 'editor' && (
+            <Button
+              variant={activeTab === 'marketing' ? 'gold' : 'ghost'}
+              className={cn(
+                  "w-full justify-start h-12 text-base font-medium transition-all duration-300",
+                  activeTab === 'marketing' 
+                    ? "bg-luxury-gold text-black hover:bg-white hover:text-black shadow-lg shadow-luxury-gold/20" 
+                    : "text-gray-400 hover:text-white hover:bg-white/5"
+              )}
+              onClick={() => {
+                onTabChange('marketing');
+                setIsOpen(false);
+              }}
+            >
+              <Mail className={cn("w-5 h-5 mr-3", activeTab === 'marketing' ? "text-black" : "text-luxury-gold")} />
+              Marketing
+            </Button>
+            )}
           </nav>
 
           {/* Footer */}

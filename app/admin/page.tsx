@@ -29,12 +29,13 @@ export const dynamic = 'force-dynamic';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { BlogsTable } from '@/components/admin/BlogsTable';
 import { BlogEditor } from '@/components/admin/BlogEditor';
+import { EmailSubscribersTable } from '@/components/admin/EmailSubscribersTable';
 
 export default function AdminPage() {
   const { user, signOut } = useAuth(true);
   
   // View State (Sidebar)
-  const [view, setView] = useState<'bookings' | 'blogs' | 'blog-editor'>('bookings');
+  const [view, setView] = useState<'bookings' | 'blogs' | 'blog-editor' | 'marketing'>('bookings');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
 
@@ -53,6 +54,50 @@ export default function AdminPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [contactSearchQuery, setContactSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('upcoming'); // Inner tabs for Bookings view
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
+
+  // Request browser notification permission on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotificationPermission(Notification.permission);
+      
+      // Request permission if not already granted or denied
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then((permission) => {
+          setNotificationPermission(permission);
+          if (permission === 'granted') {
+            console.log('🔔 Browser notifications enabled');
+          }
+        });
+      }
+    }
+  }, []);
+
+  // Function to send browser notification
+  const sendBrowserNotification = (title: string, body: string, icon?: string) => {
+    if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      try {
+        const notification = new Notification(title, {
+          body,
+          icon: icon || '/logo.png',
+          badge: '/logo.png',
+          tag: 'new-quote', // Prevents duplicate notifications
+          requireInteraction: true, // Keep notification visible until user interacts
+        });
+
+        // Focus admin dashboard when notification clicked
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+
+        // Auto close after 10 seconds
+        setTimeout(() => notification.close(), 10000);
+      } catch (error) {
+        console.error('Error sending notification:', error);
+      }
+    }
+  };
 
   // Load data - Only if NOT editor
   useEffect(() => {
@@ -99,10 +144,27 @@ export default function AdminPage() {
 
         if (newQuotes.length > 0) {
           console.log(`✨ [Background Poll] Found ${newQuotes.length} new quote(s)!`);
+          
+          // Show toast notification
           toast.success(`${newQuotes.length} new quote(s) received!`, {
             description: `From ${newQuotes[0].name}`,
             duration: 4000
           });
+
+          // Send browser notification (works even in background)
+          sendBrowserNotification(
+            '🔔 New Quote Request!',
+            `${newQuotes.length > 1 ? `${newQuotes.length} new quotes` : `From ${newQuotes[0].name}`} - ${newQuotes[0].service_type || 'Quote'} request`,
+          );
+
+          // Play notification sound
+          try {
+            const audio = new Audio('/notification.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(() => {}); // Ignore if audio can't play
+          } catch (e) {
+            // Audio not available
+          }
         }
 
         // Update state silently (this won't change the active tab)
@@ -243,7 +305,7 @@ export default function AdminPage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar 
-        activeTab={view === 'blog-editor' ? 'blogs' : view} 
+        activeTab={view === 'blog-editor' ? 'blogs' : (view as 'bookings' | 'blogs' | 'marketing')} 
         onTabChange={(v) => {
            if (v === 'blogs') {
              setSelectedBlogId(null);
@@ -467,6 +529,13 @@ export default function AdminPage() {
                   onBack={() => setView('blogs')} 
                   onSave={() => setView('blogs')} 
                />
+            </div>
+          )}
+
+          {/* MARKETING VIEW */}
+          {view === 'marketing' && (
+            <div className="fade-in animate-in slide-in-from-bottom-2 duration-300">
+              <EmailSubscribersTable />
             </div>
           )}
           

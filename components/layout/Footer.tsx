@@ -125,7 +125,7 @@ export function Footer() {
                                     <div className="p-2 rounded-full bg-white/5 border border-white/10 group-hover:border-luxury-gold/50 transition-colors shrink-0">
                                         <Mail className="text-luxury-gold" size={16} />
                                     </div>
-                                    <a href="mailto:admin@chauffeurtop.com.au" className="hover:text-luxury-gold transition-colors">admin@chauffeurtop.com.au</a>
+                                    <a href="mailto:bookings@chauffeurtop.com.au" className="hover:text-luxury-gold transition-colors">bookings@chauffeurtop.com.au</a>
                                 </li>
                             </ul>
                         </div>

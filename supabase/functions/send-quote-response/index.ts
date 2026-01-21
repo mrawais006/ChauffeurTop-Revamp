@@ -65,8 +65,8 @@ serve(async (req: Request) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'ChauffeurTop <notifications@chauffeurtop.com.au>',
-        reply_to: ['admin@chauffeurtop.com.au'],
+        from: 'ChauffeurTop <bookings@chauffeurtop.com.au>',
+        reply_to: ['bookings@chauffeurtop.com.au'],
         to: [quote.email],
         subject: type === 'booking_received' 
           ? `Your Booking Request - ChauffeurTop`
@@ -346,7 +346,7 @@ function generateQuoteResponseEmail(quote: any, priceBreakdown: any, type: strin
             </div>
             
             <p style="text-align: center; font-size: 14px; color: #6b7280; margin-top: 20px;">
-               Need to discuss? <a href="mailto:admin@chauffeurtop.com.au" style="color: #C5A572;">Contact Admin</a>
+               Need to discuss? <a href="mailto:bookings@chauffeurtop.com.au" style="color: #C5A572;">Contact Us</a>
             </p>
           </div>
           <div class="footer">

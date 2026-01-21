@@ -21,8 +21,8 @@ const ContactForm = () => {
         {
             icon: <Mail className="w-6 h-6" />,
             title: "Email",
-            content: "admin@chauffeurtop.com.au",
-            link: "mailto:admin@chauffeurtop.com.au"
+            content: "info@chauffeurtop.com.au",
+            link: "mailto:info@chauffeurtop.com.au"
         },
         {
             icon: <MapPin className="w-6 h-6" />,

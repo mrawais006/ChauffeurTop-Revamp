@@ -86,8 +86,8 @@ function ErrorContent() {
                                 </div>
                                 <div>
                                     <p className="text-xs text-white/40 uppercase tracking-wide mb-0.5">Email us</p>
-                                    <a href="mailto:admin@chauffeurtop.com.au" className="text-white hover:text-luxury-gold transition-colors text-sm font-medium">
-                                        admin@chauffeurtop.com.au
+                                    <a href="mailto:bookings@chauffeurtop.com.au" className="text-white hover:text-luxury-gold transition-colors text-sm font-medium">
+                                        bookings@chauffeurtop.com.au
                                     </a>
                                 </div>
                             </div>

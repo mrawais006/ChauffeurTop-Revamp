@@ -2,22 +2,27 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Gift, Mail } from "lucide-react";
+import { X, Gift, Mail, CheckCircle } from "lucide-react";
+import { subscribeEmail } from "@/actions/emailSubscription";
 
 interface ExitIntentPopupProps {
   onEmailCapture?: (email: string) => void;
   discountPercent?: number;
+  source?: string;
 }
 
 export function ExitIntentPopup({
   onEmailCapture,
   discountPercent = 10,
+  source = "exit_popup",
 }: ExitIntentPopupProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [hasShown, setHasShown] = useState(false);
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [discountCode, setDiscountCode] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Check if popup has been shown before in this session
   useEffect(() => {
@@ -40,37 +45,29 @@ export function ExitIntentPopup({
     [hasShown]
   );
 
-  // Mobile: Inactivity detection (30 seconds)
+  // Scroll-based trigger: Show popup when user scrolls 50% of page
   useEffect(() => {
     if (hasShown) return;
 
-    let inactivityTimer: NodeJS.Timeout;
-
-    const resetTimer = () => {
-      clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(() => {
-        if (!hasShown) {
-          setIsVisible(true);
-          setHasShown(true);
-          sessionStorage.setItem("exitIntentShown", "true");
-        }
-      }, 30000); // 30 seconds of inactivity
+    const handleScroll = () => {
+      if (hasShown) return;
+      
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrollPercent = (scrollTop / scrollHeight) * 100;
+      
+      // Trigger at 50% scroll depth
+      if (scrollPercent >= 50) {
+        setIsVisible(true);
+        setHasShown(true);
+        sessionStorage.setItem("exitIntentShown", "true");
+      }
     };
 
-    // Events to track user activity
-    const events = ["mousedown", "touchstart", "scroll", "keydown"];
-    events.forEach((event) => {
-      document.addEventListener(event, resetTimer);
-    });
-
-    // Start the timer
-    resetTimer();
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      clearTimeout(inactivityTimer);
-      events.forEach((event) => {
-        document.removeEventListener(event, resetTimer);
-      });
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [hasShown]);
 
@@ -87,21 +84,31 @@ export function ExitIntentPopup({
     if (!email || isSubmitting) return;
 
     setIsSubmitting(true);
+    setError(null);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const result = await subscribeEmail(email, source);
 
-    if (onEmailCapture) {
-      onEmailCapture(email);
+      if (result.success) {
+        setDiscountCode(result.discountCode || null);
+        setIsSubmitted(true);
+        
+        if (onEmailCapture) {
+          onEmailCapture(email);
+        }
+
+        // Close after 5 seconds to let user see the discount code
+        setTimeout(() => {
+          setIsVisible(false);
+        }, 5000);
+      } else {
+        setError(result.error || 'Something went wrong. Please try again.');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitted(true);
-    setIsSubmitting(false);
-
-    // Close after 3 seconds
-    setTimeout(() => {
-      setIsVisible(false);
-    }, 3000);
   };
 
   const handleClose = () => {
@@ -145,7 +152,7 @@ export function ExitIntentPopup({
                   <Gift className="w-8 h-8 text-luxury-black" />
                 </div>
                 <h2 className="text-2xl font-serif font-bold text-luxury-black">
-                  Wait! Don't Leave Yet
+                  First Time Customer Luxury Offer
                 </h2>
               </div>
 
@@ -164,12 +171,19 @@ export function ExitIntentPopup({
                         <input
                           type="email"
                           value={email}
-                          onChange={(e) => setEmail(e.target.value)}
+                          onChange={(e) => {
+                            setEmail(e.target.value);
+                            setError(null);
+                          }}
                           placeholder="Enter your email"
                           required
-                          className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-luxury-gold focus:outline-none transition-colors"
+                          className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-lg bg-white text-gray-900 placeholder-gray-400 focus:border-luxury-gold focus:outline-none transition-colors"
                         />
                       </div>
+
+                      {error && (
+                        <p className="text-red-500 text-sm text-center">{error}</p>
+                      )}
 
                       <button
                         type="submit"
@@ -187,13 +201,19 @@ export function ExitIntentPopup({
                 ) : (
                   <div className="text-center py-4">
                     <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                      <Gift className="w-8 h-8 text-green-600" />
+                      <CheckCircle className="w-8 h-8 text-green-600" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">
                       You're In!
                     </h3>
-                    <p className="text-gray-600">
-                      Check your email for your exclusive {discountPercent}% discount code.
+                    {discountCode && (
+                      <div className="bg-luxury-gold/10 border-2 border-luxury-gold rounded-lg p-4 mb-4">
+                        <p className="text-sm text-gray-600 mb-1">Your exclusive discount code:</p>
+                        <p className="text-2xl font-bold text-luxury-gold tracking-wider">{discountCode}</p>
+                      </div>
+                    )}
+                    <p className="text-gray-600 text-sm">
+                      Use this code at checkout for {discountPercent}% off your first booking!
                     </p>
                   </div>
                 )}

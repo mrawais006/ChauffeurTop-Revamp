@@ -84,7 +84,8 @@ serve(async (req: Request) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'ChauffeurTop <notifications@chauffeurtop.com.au>', // Fixed sender
+        from: 'ChauffeurTop <bookings@chauffeurtop.com.au>',
+        reply_to: ['bookings@chauffeurtop.com.au'],
         to: [lead.email],
         subject: subject,
         html: emailHtml,
@@ -243,7 +244,7 @@ function buildReminderEmail(lead: any, confirmationUrl: string | null): string {
           <div class="footer">
              <p>
               📞 <a href="tel:+61430240945" class="link">+61 430 240 945</a><br>
-              ✉️ <a href="mailto:admin@chauffeurtop.com.au" class="link">admin@chauffeurtop.com.au</a>
+              ✉️ <a href="mailto:bookings@chauffeurtop.com.au" class="link">bookings@chauffeurtop.com.au</a>
             </p>
             <p>© ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
           </div>
@@ -307,7 +308,7 @@ function buildDiscountEmail(lead: any, discount: any, newPrice: number, confirma
            <div class="footer">
              <p>
               📞 <a href="tel:+61430240945" class="link">+61 430 240 945</a><br>
-              ✉️ <a href="mailto:admin@chauffeurtop.com.au" class="link">admin@chauffeurtop.com.au</a>
+              ✉️ <a href="mailto:bookings@chauffeurtop.com.au" class="link">bookings@chauffeurtop.com.au</a>
             </p>
             <p>© ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
           </div>
@@ -358,7 +359,7 @@ function buildPersonalEmail(lead: any, message: string, confirmationUrl: string 
            <div class="footer">
              <p>
               📞 <a href="tel:+61430240945" class="link">+61 430 240 945</a><br>
-              ✉️ <a href="mailto:admin@chauffeurtop.com.au" class="link">admin@chauffeurtop.com.au</a>
+              ✉️ <a href="mailto:bookings@chauffeurtop.com.au" class="link">bookings@chauffeurtop.com.au</a>
             </p>
             <p>© ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
           </div>

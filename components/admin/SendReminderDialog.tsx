@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label';
 import type { Quote } from '@/types/admin';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Loader2, Bell } from 'lucide-react';
+import { Loader2, Bell, Mail, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface SendReminderDialogProps {
@@ -46,7 +46,25 @@ export function SendReminderDialog({
     try {
       setIsSending(true);
 
-      // Update reminder count
+      // Send the actual reminder via API
+      const response = await fetch('/api/send-reminder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          booking,
+          customMessage: customMessage || null,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send reminder');
+      }
+
+      // Update reminder count in database
       const newReminderCount = (booking.reminder_count || 0) + 1;
       
       const { error: updateError } = await supabase
@@ -57,11 +75,20 @@ export function SendReminderDialog({
         })
         .eq('id', booking.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Error updating reminder count:', updateError);
+      }
 
-      // Note: Email sending would be handled by a Supabase Edge Function
-      // For now, we just update the database
-      toast.success('Reminder recorded successfully!');
+      // Show success message with details
+      if (result.emailSent && result.smsSent) {
+        toast.success('Reminder sent via Email & SMS! 📧📱');
+      } else if (result.emailSent) {
+        toast.success('Reminder sent via Email! 📧');
+      } else if (result.smsSent) {
+        toast.success('Reminder sent via SMS! 📱');
+      } else {
+        toast.warning('Reminder recorded but delivery may have failed');
+      }
 
       onSuccess();
       onOpenChange(false);
@@ -103,6 +130,23 @@ export function SendReminderDialog({
             </div>
           </div>
 
+          {/* Delivery Method Info */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-3">
+            <div className="flex gap-2">
+              <div className="flex items-center gap-1 px-2 py-1 bg-blue-100 rounded-full text-blue-700 text-xs font-medium">
+                <Mail className="w-3 h-3" />
+                Email
+              </div>
+              <div className="flex items-center gap-1 px-2 py-1 bg-green-100 rounded-full text-green-700 text-xs font-medium">
+                <MessageSquare className="w-3 h-3" />
+                SMS
+              </div>
+            </div>
+            <span className="text-sm text-blue-900">
+              Reminder will be sent via both channels
+            </span>
+          </div>
+
           {/* Message Editor */}
           <div className="space-y-2">
             <Label htmlFor="message">Custom Message (optional)</Label>
@@ -115,7 +159,7 @@ export function SendReminderDialog({
               className="font-mono text-sm"
             />
             <p className="text-xs text-gray-500">
-              Leave empty to use the default reminder message
+              Leave empty to use the default reminder message. Email will include professional formatting.
             </p>
           </div>
 

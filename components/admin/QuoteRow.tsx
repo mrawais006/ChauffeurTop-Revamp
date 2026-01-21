@@ -4,7 +4,7 @@ import { useState, memo } from 'react';
 import type { Quote } from '@/types/admin';
 import { format, isValid } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SendReminderDialog } from './SendReminderDialog';
@@ -53,11 +53,50 @@ function QuoteRow({
 
   const formatPickupDate = () => {
     try {
+      if (!quote.date) return 'No date set';
+      
+      // Handle various date formats
+      let dateStr: string;
       const date = new Date(quote.date);
-      const dateStr = format(date, 'dd/MM/yyyy');
-      return `${dateStr} ${quote.time}`;
+      
+      if (isValid(date)) {
+        dateStr = format(date, 'dd/MM/yyyy');
+      } else {
+        // Try parsing as ISO string
+        const isoDate = new Date(quote.date + 'T00:00:00');
+        if (isValid(isoDate)) {
+          dateStr = format(isoDate, 'dd/MM/yyyy');
+        } else {
+          dateStr = String(quote.date);
+        }
+      }
+      
+      const timeStr = quote.time ? String(quote.time).substring(0, 5) : '';
+      return timeStr ? `${dateStr} ${timeStr}` : dateStr;
     } catch {
-      return `${quote.date} ${quote.time}`;
+      return quote.date ? `${quote.date} ${quote.time || ''}` : 'No date';
+    }
+  };
+
+  // Format destination for display
+  const formatDestination = () => {
+    try {
+      if (Array.isArray(quote.destinations) && quote.destinations.length > 0) {
+        return quote.destinations[0];
+      }
+      if (quote.dropoff_location) {
+        return quote.dropoff_location;
+      }
+      if (typeof quote.destinations === 'object' && quote.destinations !== null) {
+        // Handle return trip structure
+        const dests = quote.destinations as any;
+        if (dests.outbound?.destinations?.[0]) {
+          return dests.outbound.destinations[0];
+        }
+      }
+      return 'N/A';
+    } catch {
+      return 'N/A';
     }
   };
 
@@ -65,31 +104,38 @@ function QuoteRow({
     try {
       // If melbourne_datetime exists, use it with proper timezone conversion
       if (quote.melbourne_datetime) {
-        return safeFormatDate(
+        const result = safeFormatDate(
           quote.melbourne_datetime,
-          "MMMM do, yyyy 'at' HH:mm",
+          "MMM do 'at' HH:mm",
           MELBOURNE_TIMEZONE
         );
+        return result !== 'Invalid Date' ? result : 'Date pending';
       }
 
       // Fallback: If only date and time fields exist, combine them
       if (quote.date && quote.time) {
         // Combine date and time into ISO format
-        const dateStr = quote.date.includes('T') ? quote.date.split('T')[0] : quote.date;
-        const timeStr = quote.time.substring(0, 8); // HH:mm:ss
-        const combinedDateTime = `${dateStr}T${timeStr}Z`; // Assume UTC
+        const dateStr = String(quote.date).includes('T') ? String(quote.date).split('T')[0] : String(quote.date);
+        const timeStr = String(quote.time).substring(0, 8); // HH:mm:ss
+        const combinedDateTime = `${dateStr}T${timeStr}`;
 
-        return safeFormatDate(
+        const result = safeFormatDate(
           combinedDateTime,
-          "MMMM do, yyyy 'at' HH:mm",
+          "MMM do 'at' HH:mm",
           MELBOURNE_TIMEZONE
         );
+        return result !== 'Invalid Date' ? result : 'Date pending';
       }
 
-      return 'TBD';
+      if (quote.date) {
+        const result = safeFormatDate(String(quote.date), "MMM do, yyyy", MELBOURNE_TIMEZONE);
+        return result !== 'Invalid Date' ? result : 'Date pending';
+      }
+
+      return 'Date pending';
     } catch (error) {
       console.error('Error formatting service date:', error);
-      return `${quote.date || ''} ${quote.time || ''}`;
+      return 'Date pending';
     }
   };
 
@@ -238,13 +284,15 @@ function QuoteRow({
         {/* Service */}
         <td className="px-4 py-4 text-sm">
           <div className="text-gray-900 font-medium">{quote.vehicle_type || quote.vehicle_name || 'N/A'}</div>
-          <div className="text-gray-600 text-xs">{formatServiceDate()}</div>
+          <div className="text-gray-500 text-xs truncate max-w-[200px]" title={formatDestination()}>
+            📍 {formatDestination()}
+          </div>
+          <div className="text-gray-400 text-xs mt-0.5">{formatServiceDate()}</div>
           {quote.follow_up_count && quote.follow_up_count > 0 && (
             <div className="mt-1">
               <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
                 {quote.follow_up_count} follow-up
               </span>
-              <span className="ml-2 text-gray-600">{quote.follow_up_count || 0}</span>
             </div>
           )}
         </td>
@@ -296,6 +344,16 @@ function QuoteRow({
             >
               View Details
             </button>
+            {/* Reminder Button - only show for upcoming confirmed bookings */}
+            {showReminder && quote.status === 'confirmed' && (
+              <button
+                onClick={() => setShowReminderDialog(true)}
+                className="p-2 text-amber-600 bg-amber-50 border border-amber-200 rounded-md hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
+                title="Send Reminder"
+              >
+                <Bell className="h-4 w-4" />
+              </button>
+            )}
             {onDelete && (
               <button
                 onClick={() => onDelete(quote.id)}

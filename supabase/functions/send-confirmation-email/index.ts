@@ -142,6 +142,7 @@ async function sendCustomerConfirmation(apiKey: string, quote: any) {
     },
     body: JSON.stringify({
       from: 'ChauffeurTop <bookings@chauffeurtop.com.au>',
+      reply_to: ['bookings@chauffeurtop.com.au'],
       to: [quote.email],
       subject: `✅ Booking Confirmed - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
       html: emailHtml,
@@ -227,8 +228,9 @@ async function sendAdminNotification(apiKey: string, quote: any) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: 'ChauffeurTop Admin <notifications@chauffeurtop.com.au>',
+      from: 'ChauffeurTop <bookings@chauffeurtop.com.au>',
       to: ['bookings@chauffeurtop.com.au'],
+      reply_to: ['bookings@chauffeurtop.com.au'],
       subject: `New Booking: ${quote.name} - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
       html: emailHtml,
     }),

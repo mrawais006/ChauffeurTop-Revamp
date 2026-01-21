@@ -3,7 +3,7 @@ export const BUSINESS_CONFIG = {
   // Contact Information
   PHONE: '+61430240945',
   PHONE_DISPLAY: '(04) 3024 0945',
-  EMAIL: 'admin@chauffeurtop.com.au',
+  EMAIL: 'bookings@chauffeurtop.com.au',
   
   // Business Details
   NAME: 'ChauffeurTop Melbourne',

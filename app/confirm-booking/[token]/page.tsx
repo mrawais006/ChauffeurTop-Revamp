@@ -183,10 +183,10 @@ export default function ConfirmBookingPage() {
                             <div className="flex items-center justify-center gap-3">
                                 <Mail className="h-4 w-4 text-luxury-gold" />
                                 <a 
-                                    href="mailto:admin@chauffeurtop.com.au" 
+                                    href="mailto:bookings@chauffeurtop.com.au" 
                                     className="text-white hover:text-luxury-gold transition-colors text-sm font-medium"
                                 >
-                                    admin@chauffeurtop.com.au
+                                    bookings@chauffeurtop.com.au
                                 </a>
                             </div>
                         </div>

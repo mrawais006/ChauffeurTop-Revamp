@@ -72,7 +72,7 @@ const localBusinessSchema = {
   "description": "Premium Australian chauffeur service providing luxury corporate transfers, airport pickups, wedding transport and executive car hire across Melbourne and Victoria.",
   "url": "https://chauffeurtop.com.au",
   "telephone": "+61430240945",
-  "email": "admin@chauffeurtop.com.au",
+  "email": "bookings@chauffeurtop.com.au",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "3/199 Greenvale Dr",

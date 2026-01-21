@@ -5,9 +5,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2, Loader2, Star } from 'lucide-react';
 import type { Quote } from '@/types/admin';
 
 interface CompleteBookingDialogProps {
@@ -25,6 +26,7 @@ export function CompleteBookingDialog({
 }: CompleteBookingDialogProps) {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sendReviewRequest, setSendReviewRequest] = useState(true); // Checked by default
 
   const handleComplete = async () => {
     setLoading(true);
@@ -40,11 +42,39 @@ export function CompleteBookingDialog({
 
       if (error) throw error;
 
-      toast.success('Booking marked as complete! 🎉');
+      // Send review request if checkbox is checked
+      if (sendReviewRequest && booking.email) {
+        try {
+          const { error: reviewError } = await supabase.functions.invoke('send-review-request', {
+            body: {
+              customerEmail: booking.email,
+              customerName: booking.name,
+              customerPhone: booking.phone,
+              bookingDate: booking.date,
+              vehicleType: booking.vehicle_name || booking.vehicle_type,
+              pickupLocation: booking.pickup_location,
+            },
+          });
+
+          if (reviewError) {
+            console.error('Review request error:', reviewError);
+            toast.warning('Booking completed but review request failed to send');
+          } else {
+            toast.success('Booking completed & review request sent! 🎉⭐');
+          }
+        } catch (reviewErr) {
+          console.error('Error sending review request:', reviewErr);
+          toast.warning('Booking completed but review request failed');
+        }
+      } else {
+        toast.success('Booking marked as complete! 🎉');
+      }
+
       onSuccess({ 
         status: 'completed',
         admin_comments: notes ? `Completed: ${notes}` : 'Booking completed'
       });
+      
       onOpenChange(false);
     } catch (error) {
       console.error('Error completing booking:', error);
@@ -84,6 +114,33 @@ export function CompleteBookingDialog({
               rows={3}
               className="mt-2 text-gray-900"
             />
+          </div>
+
+          {/* Review Request Checkbox */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="sendReviewRequest"
+                checked={sendReviewRequest}
+                onCheckedChange={(checked) => setSendReviewRequest(checked === true)}
+                disabled={!booking.email}
+                className="mt-0.5 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
+              />
+              <div className="flex-1">
+                <Label 
+                  htmlFor="sendReviewRequest" 
+                  className="text-sm font-semibold text-amber-900 cursor-pointer flex items-center gap-2"
+                >
+                  <Star className="w-4 h-4 text-amber-600 fill-amber-600" />
+                  Send Google Review Request
+                </Label>
+                <p className="text-xs text-amber-700 mt-1">
+                  {booking.email 
+                    ? `An email will be sent to ${booking.email} requesting a Google review.`
+                    : 'Cannot send - customer email not available.'}
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">

@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { Send, Plus, Trash2, DollarSign, Percent, Tag } from 'lucide-react';
+import { Send, Plus, Trash2, DollarSign, Percent, Tag, Zap, RefreshCw } from 'lucide-react';
 import type { Quote, PriceItem } from '@/types/admin';
 
 interface QuoteResponseDialogProps {
@@ -203,6 +203,42 @@ export function QuoteResponseDialog({ quote, onClose, onSuccess }: QuoteResponse
             </div>
           )}
 
+          {/* Quick Pricing Buttons */}
+          <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="h-4 w-4 text-amber-600" />
+              <Label className="text-sm font-semibold text-gray-700">Quick Price Suggestions</Label>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {[89, 120, 150, 180, 220, 280, 350, 450].map((price) => (
+                <Button
+                  key={price}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setBasePrice(price)}
+                  className={`${basePrice === price ? 'bg-amber-100 border-amber-500 text-amber-700' : 'hover:bg-amber-50 hover:border-amber-300'}`}
+                >
+                  ${price}
+                </Button>
+              ))}
+            </div>
+            {quote.quoted_price && (
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setBasePrice(Number(quote.quoted_price))}
+                  className="gap-2 text-blue-600 border-blue-300 hover:bg-blue-50"
+                >
+                  <RefreshCw className="h-3 h-3" />
+                  Use Previous: ${Number(quote.quoted_price).toFixed(2)}
+                </Button>
+              </div>
+            )}
+          </div>
+
           {/* Base Price(s) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -219,6 +255,13 @@ export function QuoteResponseDialog({ quote, onClose, onSuccess }: QuoteResponse
                 placeholder="Enter base fare"
                 className="mt-2 text-lg text-gray-900 bg-white border-gray-300 placeholder:text-gray-400"
               />
+              {/* Quick adjust buttons */}
+              <div className="flex gap-1 mt-2">
+                <Button type="button" variant="ghost" size="sm" onClick={() => setBasePrice(Math.max(0, basePrice - 10))} className="text-xs">-$10</Button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setBasePrice(basePrice + 10)} className="text-xs">+$10</Button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setBasePrice(basePrice + 20)} className="text-xs">+$20</Button>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setBasePrice(Math.round(basePrice / 10) * 10)} className="text-xs">Round</Button>
+              </div>
             </div>
 
             {isReturnTrip && (
@@ -236,6 +279,12 @@ export function QuoteResponseDialog({ quote, onClose, onSuccess }: QuoteResponse
                   placeholder="Enter return fare"
                   className="mt-2 text-lg text-gray-900 bg-white border-gray-300 placeholder:text-gray-400"
                 />
+                {/* Quick adjust buttons for return */}
+                <div className="flex gap-1 mt-2">
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setReturnBasePrice(Math.max(0, returnBasePrice - 10))} className="text-xs">-$10</Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setReturnBasePrice(returnBasePrice + 10)} className="text-xs">+$10</Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setReturnBasePrice(basePrice)} className="text-xs">Same as Outbound</Button>
+                </div>
               </div>
             )}
           </div>
@@ -378,19 +427,25 @@ export function QuoteResponseDialog({ quote, onClose, onSuccess }: QuoteResponse
             </div>
           </div>
 
-          {/* Notes */}
-          <div>
-            <Label htmlFor="notes" className="text-base font-semibold text-gray-900">
-              Additional Notes (Optional)
-            </Label>
+          {/* Personal Message for Email */}
+          <div className="border-t pt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Send className="h-4 w-4 text-blue-600" />
+              <Label htmlFor="notes" className="text-base font-semibold text-gray-900">
+                Personal Message (Included in Email)
+              </Label>
+            </div>
             <Textarea
               id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Any special instructions or information for the customer..."
-              rows={3}
+              placeholder="Add a personal touch to your quote email...&#10;&#10;Example: Thank you for choosing ChauffeurTop! I've applied a special discount for your return booking. Please don't hesitate to reach out if you have any questions."
+              rows={4}
               className="mt-2 text-gray-900 bg-white border-gray-300 placeholder:text-gray-400"
             />
+            <p className="text-xs text-gray-500 mt-1">
+              This message will appear at the top of the quote email before the price breakdown.
+            </p>
           </div>
 
           {/* Actions */}
