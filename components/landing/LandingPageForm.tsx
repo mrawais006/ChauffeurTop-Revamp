@@ -21,9 +21,10 @@ import DriverInstructions from '../booking/DriverInstructions';
 
 interface LandingPageFormProps {
   preSelectedService: string; // e.g., "Airport Transfer", "Corporate Transfer", "Family Travel"
+  source?: string; // e.g., "landing_airport", "landing_corporate", "landing_family"
 }
 
-export default function LandingPageForm({ preSelectedService }: LandingPageFormProps) {
+export default function LandingPageForm({ preSelectedService, source = 'landing_page' }: LandingPageFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});

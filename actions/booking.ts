@@ -55,7 +55,33 @@ export async function submitBookingForm(
       };
     }
 
-    // 5. Send email notification
+    // 5. Store lead source data if available
+    if (quote && (formData.lead_source || formData.utm_source || formData.gclid)) {
+      const leadSourceData = {
+        quote_id: quote.id,
+        source: formData.lead_source || 'website',
+        page_url: formData.lead_source_page || null,
+        utm_source: formData.utm_source || null,
+        utm_medium: formData.utm_medium || null,
+        utm_campaign: formData.utm_campaign || null,
+        utm_content: formData.utm_content || null,
+        utm_term: formData.utm_term || null,
+        gclid: formData.gclid || null,
+      };
+
+      const { error: leadSourceError } = await supabaseAdmin
+        .from('lead_sources')
+        .insert(leadSourceData);
+
+      if (leadSourceError) {
+        // Log but don't fail the booking
+        console.error('Lead source tracking error:', leadSourceError);
+      } else {
+        console.log('Lead source tracked for quote:', quote.id);
+      }
+    }
+
+    // 6. Send email notification
     if (quote) {
        await sendBookingNotification(quote);
     }

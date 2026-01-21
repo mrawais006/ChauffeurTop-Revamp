@@ -3,9 +3,10 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { useState } from "react";
-import { MapPin, Calendar, Clock } from "lucide-react";
+import { useState, useRef } from "react";
+import { MapPin, Calendar, Clock, Users } from "lucide-react";
 import AddressAutocomplete from "@/components/maps/AddressAutocomplete";
+import { saveWidgetData } from "@/lib/formPrePopulation";
 
 export function BookingWidget() {
     const router = useRouter();
@@ -14,28 +15,52 @@ export function BookingWidget() {
     const [pickupLocation, setPickupLocation] = useState("");
     const [destination, setDestination] = useState("");
     const [date, setDate] = useState("");
-    const [timeHour, setTimeHour] = useState("");
-    const [timeMinute, setTimeMinute] = useState("");
-    const [timeAmPm, setTimeAmPm] = useState("");
+    const [time, setTime] = useState("");
+    const [passengers, setPassengers] = useState("1");
+    
+    // Ref for time input
+    const timeInputRef = useRef<HTMLInputElement>(null);
 
     // Validation
-    const isValid = pickupLocation && destination && date && timeHour && timeMinute && timeAmPm;
+    const isValid = pickupLocation && destination && date && time;
+
+    // Open time picker when clicking anywhere on the time field
+    const handleTimeClick = () => {
+        if (timeInputRef.current) {
+            try {
+                timeInputRef.current.showPicker();
+            } catch (error) {
+                timeInputRef.current.focus();
+                timeInputRef.current.click();
+            }
+        }
+    };
+    
+    // Get minimum date (today)
+    const getMinDate = () => {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
     const handleGetQuote = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!isValid) return;
 
-        // Build URL with query parameters
-        const params = new URLSearchParams({
+        // Save to sessionStorage instead of URL params
+        saveWidgetData({
             pickup: pickupLocation,
             destination: destination,
             date: date,
-            time: `${timeHour}:${timeMinute} ${timeAmPm}`
+            time: time,
+            passengers: parseInt(passengers, 10) || 1,
         });
 
-        // Navigate to booking page with pre-filled data
-        router.push(`/booking?${params.toString()}`);
+        // Navigate to booking page (data is now in sessionStorage)
+        router.push('/booking');
     };
 
     return (
@@ -81,8 +106,8 @@ export function BookingWidget() {
                             </div>
                         </div>
 
-                        {/* Row 2: Date, Time, Button */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 md:gap-4 items-end">
+                        {/* Row 2: Date, Time, Passengers, Button */}
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 md:gap-4 items-end">
                             {/* Date */}
                             <div className="space-y-1">
                                 <label className="flex items-center gap-1 text-[10px] sm:text-[11px] md:text-xs text-luxury-gold uppercase tracking-wider font-bold">
@@ -92,51 +117,52 @@ export function BookingWidget() {
                                 <input
                                     type="date"
                                     value={date}
+                                    min={getMinDate()}
                                     onChange={(e) => setDate(e.target.value)}
                                     className="w-full min-h-[44px] sm:min-h-[48px] px-2 sm:px-3 bg-white/10 border-2 border-luxury-gold/40 rounded-lg text-white text-xs sm:text-sm focus:border-luxury-gold focus:outline-none focus:ring-2 focus:ring-luxury-gold/30 focus:bg-white/20 [color-scheme:dark] transition-all"
                                 />
                             </div>
 
-                            {/* Time */}
+                            {/* Time - Native time picker for consistency */}
                             <div className="space-y-1">
                                 <label className="flex items-center gap-1 text-[10px] sm:text-[11px] md:text-xs text-luxury-gold uppercase tracking-wider font-bold">
                                     <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                                     Time
                                 </label>
-                                <div className="flex gap-1">
-                                    <select
-                                        value={timeHour}
-                                        onChange={(e) => setTimeHour(e.target.value)}
-                                        className="flex-1 min-h-[44px] sm:min-h-[48px] px-1 sm:px-2 bg-white/10 border-2 border-luxury-gold/40 rounded-lg text-white text-xs sm:text-sm focus:border-luxury-gold focus:outline-none focus:ring-2 focus:ring-luxury-gold/30 focus:bg-white/20 transition-all"
-                                    >
-                                        <option value="" className="bg-luxury-black text-white">Hr</option>
-                                        {Array.from({ length: 12 }, (_, i) => i + 1).map((h) => (
-                                            <option key={h} value={h} className="bg-luxury-black text-white">{h}</option>
-                                        ))}
-                                    </select>
-                                    <select
-                                        value={timeMinute}
-                                        onChange={(e) => setTimeMinute(e.target.value)}
-                                        className="flex-1 min-h-[44px] sm:min-h-[48px] px-1 sm:px-2 bg-white/10 border-2 border-luxury-gold/40 rounded-lg text-white text-xs sm:text-sm focus:border-luxury-gold focus:outline-none focus:ring-2 focus:ring-luxury-gold/30 focus:bg-white/20 transition-all"
-                                    >
-                                        <option value="" className="bg-luxury-black text-white">Min</option>
-                                        {["00", "15", "30", "45"].map((m) => (
-                                            <option key={m} value={m} className="bg-luxury-black text-white">{m}</option>
-                                        ))}
-                                    </select>
-                                    <select
-                                        value={timeAmPm}
-                                        onChange={(e) => setTimeAmPm(e.target.value)}
-                                        className="flex-1 min-h-[44px] sm:min-h-[48px] px-1 sm:px-2 bg-white/10 border-2 border-luxury-gold/40 rounded-lg text-white text-xs sm:text-sm focus:border-luxury-gold focus:outline-none focus:ring-2 focus:ring-luxury-gold/30 focus:bg-white/20 transition-all"
-                                    >
-                                        <option value="" className="bg-luxury-black text-white">--</option>
-                                        <option value="AM" className="bg-luxury-black text-white">AM</option>
-                                        <option value="PM" className="bg-luxury-black text-white">PM</option>
-                                    </select>
+                                <div 
+                                    className="relative cursor-pointer"
+                                    onClick={handleTimeClick}
+                                >
+                                    <input
+                                        ref={timeInputRef}
+                                        type="time"
+                                        value={time}
+                                        onChange={(e) => setTime(e.target.value)}
+                                        className="w-full min-h-[44px] sm:min-h-[48px] px-2 sm:px-3 bg-white/10 border-2 border-luxury-gold/40 rounded-lg text-white text-xs sm:text-sm focus:border-luxury-gold focus:outline-none focus:ring-2 focus:ring-luxury-gold/30 focus:bg-white/20 transition-all cursor-pointer [color-scheme:dark]"
+                                    />
                                 </div>
                             </div>
 
-                            {/* Get Quote Button - spans 2 columns on small, 2 on large */}
+                            {/* Passengers */}
+                            <div className="space-y-1">
+                                <label className="flex items-center gap-1 text-[10px] sm:text-[11px] md:text-xs text-luxury-gold uppercase tracking-wider font-bold">
+                                    <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                                    Passengers
+                                </label>
+                                <select
+                                    value={passengers}
+                                    onChange={(e) => setPassengers(e.target.value)}
+                                    className="w-full min-h-[44px] sm:min-h-[48px] px-2 sm:px-3 bg-white/10 border-2 border-luxury-gold/40 rounded-lg text-white text-xs sm:text-sm focus:border-luxury-gold focus:outline-none focus:ring-2 focus:ring-luxury-gold/30 focus:bg-white/20 transition-all"
+                                >
+                                    {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
+                                        <option key={num} value={num} className="bg-luxury-black text-white">
+                                            {num} {num === 1 ? 'Passenger' : 'Passengers'}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Get Quote Button - spans 2 columns on small */}
                             <div className="col-span-2">
                                 <Button
                                     type="submit"

@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Sparkles } from 'lucide-react';
 import { submitBookingForm } from '@/actions/booking';
 import { vehicles } from '@/lib/vehicles';
 import { detectCityFromLocations, getCityTimezone } from '@/utils/cityDetection';
 import { toCityISOString, getUserTimezone } from '@/lib/timezoneUtils';
+import { getFormData, clearFormData, getLeadSourceData } from '@/lib/formPrePopulation';
 import type { FormDestination, BookingFormData, ReturnTripStructure } from '@/types/booking';
 
 // Import all sub-components
@@ -20,10 +21,23 @@ import ReturnTripDetails from './ReturnTripDetails';
 import AirportDetails from './AirportDetails';
 import DriverInstructions from './DriverInstructions';
 
+interface PrePopulatedFields {
+  pickup?: boolean;
+  destination?: boolean;
+  date?: boolean;
+  time?: boolean;
+  passengers?: boolean;
+  vehicle?: boolean;
+  service?: boolean;
+}
+
 export default function BookingForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Track which fields were pre-populated
+  const [prePopulated, setPrePopulated] = useState<PrePopulatedFields>({});
 
   // Form state
   const [serviceType, setServiceType] = useState('');
@@ -33,6 +47,7 @@ export default function BookingForm() {
   const [destinations, setDestinations] = useState<FormDestination[]>([{ address: '' }]);
   const [date, setDate] = useState<Date>();
   const [time, setTime] = useState('');
+  const [passengersValue, setPassengersValue] = useState<number | undefined>();
   
   // Airport details
   const [flightNumber, setFlightNumber] = useState('');
@@ -45,18 +60,81 @@ export default function BookingForm() {
   const [returnPickup, setReturnPickup] = useState('');
   const [returnDestination, setReturnDestination] = useState('');
 
+  // Load pre-populated data from sessionStorage on mount
+  useEffect(() => {
+    const formData = getFormData();
+    if (!formData) return;
+
+    const newPrePopulated: PrePopulatedFields = {};
+
+    // Pre-populate pickup
+    if (formData.pickup) {
+      setPickup(formData.pickup);
+      newPrePopulated.pickup = true;
+    }
+
+    // Pre-populate destination
+    if (formData.destination) {
+      setDestinations([{ address: formData.destination }]);
+      newPrePopulated.destination = true;
+    }
+
+    // Pre-populate date
+    if (formData.date) {
+      const parsedDate = new Date(formData.date);
+      if (!isNaN(parsedDate.getTime())) {
+        setDate(parsedDate);
+        newPrePopulated.date = true;
+      }
+    }
+
+    // Pre-populate time
+    if (formData.time) {
+      setTime(formData.time);
+      newPrePopulated.time = true;
+    }
+
+    // Pre-populate passengers
+    if (formData.passengers) {
+      setPassengersValue(formData.passengers);
+      newPrePopulated.passengers = true;
+    }
+
+    // Pre-populate vehicle type
+    if (formData.vehicle_type) {
+      setVehicle(formData.vehicle_type);
+      newPrePopulated.vehicle = true;
+    }
+
+    // Pre-populate service type
+    if (formData.service_type) {
+      setServiceType(formData.service_type);
+      newPrePopulated.service = true;
+    }
+
+    setPrePopulated(newPrePopulated);
+  }, []);
+
   // Max 4 destinations
   const canAddMoreDestinations = destinations.length < 4;
 
   // Location handlers
   const handlePickupChange = (value: string) => {
     setPickup(value);
+    // Clear pre-populated indicator when user changes value
+    if (prePopulated.pickup) {
+      setPrePopulated(prev => ({ ...prev, pickup: false }));
+    }
   };
 
   const handleDestinationChange = (index: number, value: string) => {
     const newDestinations = [...destinations];
     newDestinations[index] = { address: value };
     setDestinations(newDestinations);
+    // Clear pre-populated indicator
+    if (index === 0 && prePopulated.destination) {
+      setPrePopulated(prev => ({ ...prev, destination: false }));
+    }
   };
 
   const addDestination = () => {
@@ -69,6 +147,22 @@ export default function BookingForm() {
     if (destinations.length > 1) {
       const newDestinations = destinations.filter((_, i) => i !== index);
       setDestinations(newDestinations);
+    }
+  };
+
+  // Handle vehicle change
+  const handleVehicleChange = (value: string) => {
+    setVehicle(value);
+    if (prePopulated.vehicle) {
+      setPrePopulated(prev => ({ ...prev, vehicle: false }));
+    }
+  };
+
+  // Handle service type change
+  const handleServiceTypeChange = (value: string) => {
+    setServiceType(value);
+    if (prePopulated.service) {
+      setPrePopulated(prev => ({ ...prev, service: false }));
     }
   };
 
@@ -170,17 +264,20 @@ export default function BookingForm() {
         destinationsField = destinationsArray;
       }
 
+      // Get lead source data from sessionStorage
+      const leadSourceData = getLeadSourceData();
+
       // Create booking data object
       const bookingData: BookingFormData = {
         name: formData.get('name') as string,
         email: (formData.get('email') as string) || null,
         phone: phoneNumber,
-        passengers: Number(formData.get('passengers') || '1'),
+        passengers: passengersValue || Number(formData.get('passengers') || '1'),
         vehicle_type: vehicle,
         vehicle_name: selectedVehicle?.name || '',
         vehicle_model: selectedVehicle?.models || '',
         pickup_location: pickup,
-        dropoff_location: destinationsArray[0] || '', // Add dropoff_location from first destination
+        dropoff_location: destinationsArray[0] || '',
         destinations: destinationsField,
         date: dateString,
         time: time,
@@ -192,6 +289,15 @@ export default function BookingForm() {
         timezone: cityTimezone,
         user_timezone: userTimezone,
         city: detectedCity,
+        // Include lead source data
+        lead_source: leadSourceData.source,
+        lead_source_page: leadSourceData.source_page,
+        utm_source: leadSourceData.utm_source,
+        utm_medium: leadSourceData.utm_medium,
+        utm_campaign: leadSourceData.utm_campaign,
+        utm_content: leadSourceData.utm_content,
+        utm_term: leadSourceData.utm_term,
+        gclid: leadSourceData.gclid,
       };
 
       console.log('Submitting booking:', bookingData);
@@ -200,6 +306,9 @@ export default function BookingForm() {
       const result = await submitBookingForm(bookingData);
 
       if (result.success) {
+        // Clear sessionStorage on successful submission
+        clearFormData();
+
         // Track conversion (client-side)
         if (typeof window !== 'undefined' && (window as any).gtag) {
           (window as any).gtag('event', 'conversion', {
@@ -232,12 +341,31 @@ export default function BookingForm() {
     }
   };
 
+  // Check if any fields are pre-populated
+  const hasPrePopulatedFields = Object.values(prePopulated).some(v => v);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-10 bg-gradient-to-br from-white via-white to-gray-50/80 p-6 md:p-10 lg:p-14 rounded-xl shadow-2xl border-2 border-luxury-gold/50 backdrop-blur-sm">
-      {/* Service Type */}
-      <ServiceTypeSelect value={serviceType} onChange={setServiceType} />
+      
+      {/* Pre-populated indicator */}
+      {hasPrePopulatedFields && (
+        <div className="flex items-center gap-2 p-4 bg-luxury-gold/10 border border-luxury-gold/30 rounded-lg">
+          <Sparkles className="w-5 h-5 text-luxury-gold" />
+          <p className="text-sm text-luxury-black">
+            Some fields have been pre-filled. You can modify them if needed.
+          </p>
+        </div>
+      )}
 
-      {/* Airport Details (if Airport Transfer selected) - appears right after service type */}
+      {/* Service Type */}
+      <div className={prePopulated.service ? 'ring-2 ring-luxury-gold/50 rounded-lg p-1 -m-1' : ''}>
+        <ServiceTypeSelect value={serviceType} onChange={handleServiceTypeChange} />
+        {prePopulated.service && (
+          <p className="text-xs text-luxury-gold mt-1 ml-1">Pre-selected</p>
+        )}
+      </div>
+
+      {/* Airport Details (if Airport Transfer selected) */}
       {serviceType === 'Airport Transfer' && (
         <AirportDetails
           flightNumber={flightNumber}
@@ -248,10 +376,19 @@ export default function BookingForm() {
       )}
 
       {/* Vehicle Selection */}
-      <VehicleSelect value={vehicle} onChange={setVehicle} />
+      <div className={prePopulated.vehicle ? 'ring-2 ring-luxury-gold/50 rounded-lg p-1 -m-1' : ''}>
+        <VehicleSelect value={vehicle} onChange={handleVehicleChange} />
+        {prePopulated.vehicle && (
+          <p className="text-xs text-luxury-gold mt-1 ml-1">Pre-selected</p>
+        )}
+      </div>
 
       {/* Contact Details */}
-      <ContactDetails onPhoneChange={setPhoneNumber} selectedVehicle={vehicle} />
+      <ContactDetails 
+        onPhoneChange={setPhoneNumber} 
+        selectedVehicle={vehicle}
+        defaultPassengers={passengersValue}
+      />
 
       {/* Location Details */}
       <LocationDetails
@@ -262,6 +399,8 @@ export default function BookingForm() {
         onAddDestination={addDestination}
         onRemoveDestination={removeDestination}
         canAddMoreDestinations={canAddMoreDestinations}
+        pickupPrePopulated={prePopulated.pickup}
+        destinationPrePopulated={prePopulated.destination}
       />
 
       {/* Date & Time */}
@@ -272,13 +411,11 @@ export default function BookingForm() {
         onTimeChange={setTime}
       />
 
-      {/* Return Trip Toggle */}
-      {destinations.length > 0 && destinations[0]?.address && (
-        <ReturnTripToggle 
-          needsReturnTrip={needsReturnTrip}
-          onToggle={setNeedsReturnTrip}
-        />
-      )}
+      {/* Return Trip Toggle - Always visible */}
+      <ReturnTripToggle 
+        needsReturnTrip={needsReturnTrip}
+        onToggle={setNeedsReturnTrip}
+      />
 
       {/* Return Trip Details */}
       {needsReturnTrip && (
@@ -324,4 +461,3 @@ export default function BookingForm() {
     </form>
   );
 }
-

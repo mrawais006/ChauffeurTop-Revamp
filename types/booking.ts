@@ -32,6 +32,16 @@ export interface BookingFormData {
   timezone: string;
   user_timezone: string;
   city: string;
+  
+  // Lead Source Tracking (optional)
+  lead_source?: string;
+  lead_source_page?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
+  utm_term?: string;
+  gclid?: string;
 }
 
 export interface ReturnTripStructure {

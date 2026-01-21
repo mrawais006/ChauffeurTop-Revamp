@@ -7,12 +7,14 @@ import { countries, Country, formatPhoneForCountry } from '@/lib/countries';
 interface ContactDetailsProps {
   onPhoneChange?: (value: string) => void;
   selectedVehicle?: string;
+  defaultPassengers?: number;
 }
 
-export default function ContactDetails({ onPhoneChange, selectedVehicle }: ContactDetailsProps) {
+export default function ContactDetails({ onPhoneChange, selectedVehicle, defaultPassengers }: ContactDetailsProps) {
   const [selectedCountry, setSelectedCountry] = useState<Country>(countries[0]); // Default to Australia
   const [phoneValue, setPhoneValue] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [needsChildSeats, setNeedsChildSeats] = useState(false);
   
   // Get max passengers for selected vehicle
   const maxPassengers = selectedVehicle 
@@ -149,7 +151,7 @@ export default function ContactDetails({ onPhoneChange, selectedVehicle }: Conta
             name="passengers"
             min="1"
             max={maxPassengers}
-            defaultValue="1"
+            defaultValue={defaultPassengers || 1}
             required
             className="w-full px-4 py-3 bg-white border-2 border-luxury-gold/40 rounded-md text-luxury-black text-base placeholder:text-transparent focus:border-luxury-gold focus:outline-none focus:ring-2 focus:ring-luxury-gold/30 transition-all min-h-[48px]"
           />
@@ -159,6 +161,38 @@ export default function ContactDetails({ onPhoneChange, selectedVehicle }: Conta
             </p>
           )}
         </div>
+      </div>
+
+      {/* Child Seats Checkbox */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="needs_child_seats"
+            name="needs_child_seats"
+            checked={needsChildSeats}
+            onChange={(e) => setNeedsChildSeats(e.target.checked)}
+            className="w-5 h-5 rounded border-2 border-luxury-gold/40 text-luxury-gold focus:ring-luxury-gold focus:ring-2 cursor-pointer"
+          />
+          <label htmlFor="needs_child_seats" className="text-base text-luxury-black cursor-pointer">
+            I need child seats for this trip
+          </label>
+        </div>
+        
+        {needsChildSeats && (
+          <div className="ml-8">
+            <label htmlFor="child_seat_details" className="block text-sm text-luxury-gold uppercase tracking-wider font-bold mb-2">
+              Child Seat Details
+            </label>
+            <textarea
+              id="child_seat_details"
+              name="child_seat_details"
+              rows={3}
+              placeholder="Please specify ages of children or seat types needed (e.g., infant capsule, toddler seat, booster)"
+              className="w-full px-4 py-3 bg-white border-2 border-luxury-gold/40 rounded-md text-luxury-black text-base placeholder:text-gray-400 focus:border-luxury-gold focus:outline-none focus:ring-2 focus:ring-luxury-gold/30 transition-all resize-none"
+            />
+          </div>
+        )}
       </div>
       
       {/* Click outside to close dropdown */}

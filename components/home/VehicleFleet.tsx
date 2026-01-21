@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { saveVehicleSelection } from "@/lib/formPrePopulation";
 
 const vehicles = {
     sedan: {
@@ -42,6 +44,7 @@ type VehicleType = keyof typeof vehicles;
 
 export function VehicleFleet() {
     const [activeTab, setActiveTab] = useState<VehicleType>("sedan");
+    const router = useRouter();
 
     const getLabel = (type: VehicleType) => {
         switch (type) {
@@ -52,6 +55,24 @@ export function VehicleFleet() {
             case "premium": return "Premium Sedan";
             default: return type;
         }
+    };
+
+    // Map vehicle types to vehicle categories used in booking form
+    const getVehicleCategory = (type: VehicleType): string => {
+        switch (type) {
+            case "sedan": return "executive_sedan";
+            case "suv": return "premium_suv";
+            case "van": return "people_mover";
+            case "eco": return "executive_sedan"; // Map eco to executive sedan
+            case "premium": return "premium_sedan";
+            default: return "executive_sedan";
+        }
+    };
+
+    const handleGetQuote = () => {
+        const category = getVehicleCategory(activeTab);
+        saveVehicleSelection(category, '/');
+        router.push('/booking');
     };
 
     return (
@@ -111,14 +132,13 @@ export function VehicleFleet() {
                                     {vehicles[activeTab].description}
                                 </p>
 
-                                <Link href={`/booking?vehicle=${activeTab}`}>
-                                    <Button
-                                        variant="gold"
-                                        className="bg-gold-gradient text-black px-8 py-6 text-sm font-bold tracking-widest hover:scale-105 transition-transform"
-                                    >
-                                        GET CODE
-                                    </Button>
-                                </Link>
+                                <Button
+                                    variant="gold"
+                                    onClick={handleGetQuote}
+                                    className="bg-gold-gradient text-black px-8 py-6 text-sm font-bold tracking-widest hover:scale-105 transition-transform"
+                                >
+                                    Get Quote
+                                </Button>
                             </div>
                         </motion.div>
                     </AnimatePresence>

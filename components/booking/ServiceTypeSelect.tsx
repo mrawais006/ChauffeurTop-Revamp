@@ -17,6 +17,7 @@ export default function ServiceTypeSelect({ value, onChange }: ServiceTypeSelect
   const serviceTypes = [
     { value: 'Airport Transfer', label: 'Airport Transfer' },
     { value: 'Corporate Travel', label: 'Corporate Travel' },
+    { value: 'Family Travel', label: 'Family Travel' },
     { value: 'Special Events', label: 'Special Events' },
     { value: 'Winery Tours', label: 'Winery Tours' },
     { value: 'Point to Point', label: 'Point to Point' },

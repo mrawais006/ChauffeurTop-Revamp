@@ -308,7 +308,7 @@ export default function AdminPage() {
                   >
                     <span className="text-2xl md:text-xl md:mb-1">🚗</span>
                     <span className="hidden md:block font-medium">Upcoming</span>
-                    <span className="hidden md:block text-[10px] opacity-70">({upcomingBookings.length})</span>
+                    <span className="text-[10px] md:text-[10px] opacity-70 mt-1">({upcomingBookings.length})</span>
                   </TabsTrigger>
 
                   <TabsTrigger
@@ -317,7 +317,7 @@ export default function AdminPage() {
                   >
                     <span className="text-2xl md:text-xl md:mb-1">📝</span>
                     <span className="hidden md:block font-medium">Quotes</span>
-                    <span className="hidden md:block text-[10px] opacity-70">({quotes.length})</span>
+                    <span className="text-[10px] md:text-[10px] opacity-70 mt-1">({quotes.length})</span>
                   </TabsTrigger>
 
                   <TabsTrigger
@@ -326,7 +326,7 @@ export default function AdminPage() {
                   >
                     <span className="text-2xl md:text-xl md:mb-1">✅</span>
                     <span className="hidden md:block font-medium">Bookings</span>
-                    <span className="hidden md:block text-[10px] opacity-70">({bookings.length})</span>
+                    <span className="text-[10px] md:text-[10px] opacity-70 mt-1">({bookings.length})</span>
                   </TabsTrigger>
 
                   <TabsTrigger
@@ -335,7 +335,7 @@ export default function AdminPage() {
                   >
                     <span className="text-2xl md:text-xl md:mb-1">📋</span>
                     <span className="hidden md:block font-medium">History</span>
-                    <span className="hidden md:block text-[10px] opacity-70">({history.length})</span>
+                    <span className="text-[10px] md:text-[10px] opacity-70 mt-1">({history.length})</span>
                   </TabsTrigger>
 
                   <TabsTrigger
@@ -344,7 +344,7 @@ export default function AdminPage() {
                   >
                     <span className="text-2xl md:text-xl md:mb-1">💬</span>
                     <span className="hidden md:block font-medium">Contacts</span>
-                    <span className="hidden md:block text-[10px] opacity-70">({filteredContacts.length})</span>
+                    <span className="text-[10px] md:text-[10px] opacity-70 mt-1">({filteredContacts.length})</span>
                   </TabsTrigger>
               </TabsList>
 

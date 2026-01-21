@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Users, Briefcase, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
+import { saveVehicleSelection } from "@/lib/formPrePopulation";
 
 interface FleetItem {
     name: string;
+    category: string; // Maps to vehicle category in booking form
     description: string;
     passengers: number;
     luggage: number;
@@ -15,9 +18,14 @@ interface FleetItem {
     image: string;
 }
 
+interface FleetGridProps {
+    hideCTAButtons?: boolean;
+}
+
 const defaultFleet: FleetItem[] = [
     {
         name: "Executive Sedans",
+        category: "executive_sedan",
         description: "Ideal for 1-3 passengers, combining elegance with comfort for business and leisure.",
         passengers: 3,
         luggage: 2,
@@ -26,6 +34,7 @@ const defaultFleet: FleetItem[] = [
     },
     {
         name: "Premium Sedans",
+        category: "premium_sedan",
         description: "Ultimate luxury for VIP travel. BMW 7 Series, Audi A8, Mercedes S-Class quality.",
         passengers: 3,
         luggage: 2,
@@ -34,6 +43,7 @@ const defaultFleet: FleetItem[] = [
     },
     {
         name: "Premium SUVs",
+        category: "premium_suv",
         description: "Spacious and powerful, perfect for small groups or extra luggage requirements.",
         passengers: 3,
         luggage: 5,
@@ -42,6 +52,7 @@ const defaultFleet: FleetItem[] = [
     },
     {
         name: "People Movers",
+        category: "people_mover",
         description: "Seamless comfort for larger groups and families.",
         passengers: 6,
         luggage: 6,
@@ -50,6 +61,7 @@ const defaultFleet: FleetItem[] = [
     },
     {
         name: "Minibuses & Coaches",
+        category: "minibus_coach",
         description: "Luxury transport for medium to large groups and events.",
         passengers: 14,
         luggage: 10,
@@ -58,7 +70,16 @@ const defaultFleet: FleetItem[] = [
     }
 ];
 
-export function FleetGrid() {
+export function FleetGrid({ hideCTAButtons = false }: FleetGridProps) {
+    const router = useRouter();
+
+    const handleVehicleSelect = (vehicle: FleetItem) => {
+        // Save vehicle selection to sessionStorage
+        saveVehicleSelection(vehicle.category, '/fleet');
+        // Navigate to booking page
+        router.push('/booking');
+    };
+
     return (
         <section className="py-24 bg-luxury-black relative">
             <div className="absolute inset-0 bg-[url('/pattern.png')] opacity-5 pointer-events-none" />
@@ -120,11 +141,15 @@ export function FleetGrid() {
                                     </div>
                                 </div>
 
-                                <Link href={`/booking?vehicle=${encodeURIComponent(vehicle.name)}`}>
-                                    <Button className="w-full bg-transparent border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-black transition-all">
+                                {/* Only show CTA buttons if not hidden */}
+                                {!hideCTAButtons && (
+                                    <Button 
+                                        onClick={() => handleVehicleSelect(vehicle)}
+                                        className="w-full bg-transparent border border-luxury-gold text-luxury-gold hover:bg-luxury-gold hover:text-black transition-all"
+                                    >
                                         Get Quote
                                     </Button>
-                                </Link>
+                                )}
                             </div>
                         </motion.div>
                     ))}

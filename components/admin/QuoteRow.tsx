@@ -177,6 +177,31 @@ function QuoteRow({
     }
   };
 
+  // Source badge colors
+  const getSourceBadge = (source: string | null | undefined) => {
+    if (!source) {
+      return { color: 'bg-gray-100 text-gray-600', label: 'Website' };
+    }
+    switch (source) {
+      case 'landing_airport':
+        return { color: 'bg-blue-100 text-blue-700', label: 'Airport Ad' };
+      case 'landing_corporate':
+        return { color: 'bg-purple-100 text-purple-700', label: 'Corporate Ad' };
+      case 'landing_family':
+        return { color: 'bg-green-100 text-green-700', label: 'Family Ad' };
+      case 'homepage_widget':
+        return { color: 'bg-amber-100 text-amber-700', label: 'Widget' };
+      case 'vehicle_selection':
+        return { color: 'bg-cyan-100 text-cyan-700', label: 'Fleet' };
+      case 'service_selection':
+        return { color: 'bg-indigo-100 text-indigo-700', label: 'Service' };
+      case 'website':
+        return { color: 'bg-gray-100 text-gray-600', label: 'Website' };
+      default:
+        return { color: 'bg-gray-100 text-gray-600', label: source };
+    }
+  };
+
   const rowBg = getRowBackground(quote.status);
 
   return (
@@ -222,6 +247,19 @@ function QuoteRow({
               <span className="ml-2 text-gray-600">{quote.follow_up_count || 0}</span>
             </div>
           )}
+        </td>
+
+        {/* Source */}
+        <td className="px-4 py-4 text-sm">
+          {(() => {
+            const source = quote.lead_source?.source;
+            const badge = getSourceBadge(source);
+            return (
+              <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${badge.color}`}>
+                {badge.label}
+              </span>
+            );
+          })()}
         </td>
 
         {/* Status */}

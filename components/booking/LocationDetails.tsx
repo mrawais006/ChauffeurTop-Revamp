@@ -11,6 +11,8 @@ interface LocationDetailsProps {
   onAddDestination: () => void;
   onRemoveDestination: (index: number) => void;
   canAddMoreDestinations: boolean;
+  pickupPrePopulated?: boolean;
+  destinationPrePopulated?: boolean;
 }
 
 export default function LocationDetails({
@@ -21,13 +23,15 @@ export default function LocationDetails({
   onAddDestination,
   onRemoveDestination,
   canAddMoreDestinations,
+  pickupPrePopulated,
+  destinationPrePopulated,
 }: LocationDetailsProps) {
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-serif text-luxury-black border-b-2 border-luxury-gold/30 pb-3">Trip Details</h3>
       
       {/* Pickup Location with Autocomplete - Senior Accessible */}
-      <div>
+      <div className={pickupPrePopulated ? 'ring-2 ring-luxury-gold/50 rounded-lg p-2 -m-2' : ''}>
         <label htmlFor="pickup" className="block text-sm text-luxury-gold uppercase tracking-wider font-bold mb-2">
           Pickup Location <span className="text-red-400">*</span>
         </label>
@@ -39,6 +43,9 @@ export default function LocationDetails({
           required
           onAddressSelect={onPickupChange}
         />
+        {pickupPrePopulated && (
+          <p className="text-xs text-luxury-gold mt-1">Pre-filled from your selection</p>
+        )}
       </div>
 
       {/* Destinations with Autocomplete - Senior Accessible */}

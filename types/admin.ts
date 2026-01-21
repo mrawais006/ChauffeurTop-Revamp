@@ -1,3 +1,17 @@
+export interface LeadSource {
+  id: string;
+  quote_id: string;
+  source: string;
+  page_url: string | null;
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_content: string | null;
+  utm_term: string | null;
+  gclid: string | null;
+  created_at: string;
+}
+
 export interface Quote {
   id: string;
   created_at: string;
@@ -35,6 +49,8 @@ export interface Quote {
   trip_leg?: 'one-way' | 'outbound' | 'return' | null;
   related_booking_id?: string | null;
   confirmation_token?: string | null;
+  // Lead source (joined from lead_sources table)
+  lead_source?: LeadSource | null;
 }
 
 export type QuoteStatus =
@@ -71,6 +87,7 @@ export interface QuoteFilters {
   priceMin: number | null;
   priceMax: number | null;
   vehicleType: string | 'all';
+  leadSource: string | 'all';
 }
 
 export interface ContactFilters {

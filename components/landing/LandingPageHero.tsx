@@ -8,13 +8,15 @@ interface LandingPageHeroProps {
   subheadline: string;
   backgroundImage: string;
   trustIndicators?: string[];
+  pricingText?: string;
 }
 
 export function LandingPageHero({
   headline,
   subheadline,
   backgroundImage,
-  trustIndicators = []
+  trustIndicators = [],
+  pricingText
 }: LandingPageHeroProps) {
   const scrollToForm = () => {
     const formSection = document.getElementById('quote-form');
@@ -55,6 +57,11 @@ export function LandingPageHero({
             GET INSTANT QUOTE
             <ArrowDown className="ml-2" size={24} />
           </Button>
+
+          {/* Pricing Text */}
+          {pricingText && (
+            <p className="mt-4 text-luxury-gold font-semibold text-lg">{pricingText}</p>
+          )}
 
           {/* Trust Indicators */}
           {trustIndicators.length > 0 && (

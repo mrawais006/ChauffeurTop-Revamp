@@ -58,15 +58,15 @@ export function ServiceHero({ title, subtitle, description, backgroundImage, onB
                                 Get Quote
                             </Button>
                         </Link>
-                        <Link href="/booking">
+                        <a href="tel:+61430240945">
                             <Button
                                 variant="outline"
                                 size="lg"
                                 className="border-white/20 text-white hover:bg-white/10 font-medium text-lg min-w-[200px]"
                             >
-                                Get A Quote
+                                Call Now
                             </Button>
-                        </Link>
+                        </a>
                     </div>
                 </motion.div>
             </div>

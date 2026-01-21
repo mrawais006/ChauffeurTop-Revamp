@@ -5,6 +5,7 @@ export const metadata: Metadata = {
     title: "Melbourne Corporate Transfers | Executive Chauffeur Service - ChauffeurTop",
     description: "Executive corporate transfers in Melbourne. Monthly billing, NDA-compliant drivers, dedicated account manager. Work while you travel. Book now!",
     keywords: ["corporate transfer melbourne", "executive chauffeur service", "business travel melbourne", "corporate car hire", "monthly billing chauffeur"],
+    robots: { index: false, follow: false },
     alternates: {
         canonical: "https://chauffeurtop.com.au/ads/corporate-transfer",
     },
