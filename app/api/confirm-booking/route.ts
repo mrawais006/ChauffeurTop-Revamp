@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Log the confirmation activity (fire-and-forget - non-blocking)
-        supabase.from('quote_activities').insert({
+        Promise.resolve(supabase.from('quote_activities').insert({
             quote_id: quote.id,
             action_type: 'customer_confirmed',
             details: {
@@ -73,20 +73,20 @@ export async function GET(request: NextRequest) {
                 confirmed_price: quote.quoted_price,
                 confirmation_method: 'email_link'
             }
-        }).then(() => console.log('[Confirm Booking] Activity logged'))
+        })).then(() => console.log('[Confirm Booking] Activity logged'))
           .catch(e => console.error('[Confirm Booking] Activity log error:', e));
 
         // Fire all notifications in parallel (non-blocking for fast confirmation)
         // Customer email
-        supabase.functions.invoke('send-confirmation-email', {
+        Promise.resolve(supabase.functions.invoke('send-confirmation-email', {
             body: { quote: quote, type: 'customer' }
-        }).then(() => console.log('[Confirm Booking] Customer email sent'))
+        })).then(() => console.log('[Confirm Booking] Customer email sent'))
           .catch(e => console.error('[Confirm Booking] Customer email error:', e));
 
         // Admin email
-        supabase.functions.invoke('send-confirmation-email', {
+        Promise.resolve(supabase.functions.invoke('send-confirmation-email', {
             body: { quote: quote, type: 'admin' }
-        }).then(() => console.log('[Confirm Booking] Admin email sent'))
+        })).then(() => console.log('[Confirm Booking] Admin email sent'))
           .catch(e => console.error('[Confirm Booking] Admin email error:', e));
 
         // SMS Confirmation via Twilio (fire-and-forget)
