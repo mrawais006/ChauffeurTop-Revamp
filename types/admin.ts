@@ -23,6 +23,7 @@ export interface Quote {
   vehicle_model: string | null;
   passengers: number;
   pickup_location: string;
+  dropoff_location?: string | null; // Legacy field, some records may have this
   destinations: any; // Can be array or object (return trip)
   date: string;
   time: string;
