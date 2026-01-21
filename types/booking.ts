@@ -42,6 +42,10 @@ export interface BookingFormData {
   utm_content?: string;
   utm_term?: string;
   gclid?: string;
+  
+  // Child Seat Requirements (optional)
+  needs_child_seats?: boolean;
+  child_seat_details?: string;
 }
 
 export interface ReturnTripStructure {

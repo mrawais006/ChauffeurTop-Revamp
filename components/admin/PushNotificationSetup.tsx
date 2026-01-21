@@ -7,6 +7,9 @@ import { toast } from 'sonner';
 
 type PermissionState = 'default' | 'granted' | 'denied' | 'unsupported';
 
+// localStorage key for persisting notification state
+const NOTIFICATION_ENABLED_KEY = 'chauffeurtop-notifications-enabled';
+
 export function PushNotificationSetup() {
   const [permission, setPermission] = useState<PermissionState>('default');
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -35,12 +38,28 @@ export function PushNotificationSetup() {
     // Get current permission state
     setPermission(Notification.permission as PermissionState);
 
-    // Check if already subscribed
-    if (Notification.permission === 'granted') {
+    // Check localStorage for persisted notification state (primary source of truth)
+    const savedState = localStorage.getItem(NOTIFICATION_ENABLED_KEY);
+    
+    if (savedState === 'true' && Notification.permission === 'granted') {
+      // User previously enabled notifications and permission is still granted
+      setIsSubscribed(true);
+      
+      // Ensure service worker is registered
+      try {
+        await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      } catch (error) {
+        console.error('Error registering service worker:', error);
+      }
+    } else if (Notification.permission === 'granted') {
+      // Permission granted but no localStorage state - check push subscription as fallback
       try {
         const registration = await navigator.serviceWorker.ready;
         const subscription = await registration.pushManager.getSubscription();
-        setIsSubscribed(!!subscription);
+        if (subscription) {
+          setIsSubscribed(true);
+          localStorage.setItem(NOTIFICATION_ENABLED_KEY, 'true');
+        }
       } catch (error) {
         console.error('Error checking subscription:', error);
       }
@@ -104,6 +123,9 @@ export function PushNotificationSetup() {
         }
       }
 
+      // Persist enabled state to localStorage
+      localStorage.setItem(NOTIFICATION_ENABLED_KEY, 'true');
+      
       setIsSubscribed(true);
       toast.success('Notifications enabled! You\'ll be notified of new bookings.');
 
@@ -128,6 +150,9 @@ export function PushNotificationSetup() {
         await supabase.from('push_subscriptions').delete().eq('endpoint', subscription.endpoint);
       }
 
+      // Remove from localStorage
+      localStorage.removeItem(NOTIFICATION_ENABLED_KEY);
+      
       setIsSubscribed(false);
       toast.success('Notifications disabled');
     } catch (error) {

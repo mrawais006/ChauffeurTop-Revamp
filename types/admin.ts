@@ -52,6 +52,9 @@ export interface Quote {
   confirmation_token?: string | null;
   // Lead source (joined from lead_sources table)
   lead_source?: LeadSource | null;
+  // Child seat requirements
+  needs_child_seats?: boolean | null;
+  child_seat_details?: string | null;
 }
 
 export type QuoteStatus =

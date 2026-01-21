@@ -47,7 +47,8 @@ import {
   UserCheck,
   XCircle,
   CheckCircle2,
-  MessageCircle
+  MessageCircle,
+  Baby
 } from 'lucide-react';
 import { QuoteResponseDialog } from './QuoteResponseDialog';
 import { FollowUpDialog } from './FollowUpDialog';
@@ -398,6 +399,21 @@ Chauffeur Top Melbourne Team`;
                   <span className="text-xs font-medium">Driver Instructions</span>
                 </div>
                 <p className="text-sm text-gray-800">{quote.driver_instructions}</p>
+              </div>
+            )}
+
+            {/* Child Seat Requirements */}
+            {quote.needs_child_seats && (
+              <div className="bg-pink-50 border border-pink-200 rounded-lg p-3">
+                <div className="flex items-center gap-2 text-pink-700 mb-1">
+                  <Baby className="h-4 w-4" />
+                  <span className="text-xs font-medium">Child Seat Required</span>
+                </div>
+                {quote.child_seat_details ? (
+                  <p className="text-sm text-gray-800">{quote.child_seat_details}</p>
+                ) : (
+                  <p className="text-sm text-gray-500 italic">No specific details provided</p>
+                )}
               </div>
             )}
           </div>
