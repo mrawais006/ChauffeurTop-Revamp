@@ -30,6 +30,8 @@ import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { BlogsTable } from '@/components/admin/BlogsTable';
 import { BlogEditor } from '@/components/admin/BlogEditor';
 import { EmailSubscribersTable } from '@/components/admin/EmailSubscribersTable';
+import { PWAInstallPrompt } from '@/components/admin/PWAInstallPrompt';
+import { PushNotificationSetup } from '@/components/admin/PushNotificationSetup';
 
 export default function AdminPage() {
   const { user, signOut } = useAuth(true);
@@ -534,13 +536,23 @@ export default function AdminPage() {
 
           {/* MARKETING VIEW */}
           {view === 'marketing' && (
-            <div className="fade-in animate-in slide-in-from-bottom-2 duration-300">
+            <div className="fade-in animate-in slide-in-from-bottom-2 duration-300 space-y-6">
+              {/* Push Notification Settings */}
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Notification Settings</h2>
+                <PushNotificationSetup />
+              </div>
+              
+              {/* Email Subscribers */}
               <EmailSubscribersTable />
             </div>
           )}
           
         </div>
       </main>
+      
+      {/* PWA Install Prompt - Shows on mobile when app can be installed */}
+      <PWAInstallPrompt />
     </div>
   );
 }

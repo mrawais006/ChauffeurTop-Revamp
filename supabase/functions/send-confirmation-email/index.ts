@@ -229,7 +229,8 @@ async function sendAdminNotification(apiKey: string, quote: any) {
     },
     body: JSON.stringify({
       from: 'ChauffeurTop <bookings@chauffeurtop.com.au>',
-      to: ['bookings@chauffeurtop.com.au'],
+      // IMPORTANT: Admin receives at different email than FROM to avoid Resend suppression
+      to: ['admin@chauffeurtop.com.au'],
       reply_to: ['bookings@chauffeurtop.com.au'],
       subject: `New Booking: ${quote.name} - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
       html: emailHtml,

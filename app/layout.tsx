@@ -26,6 +26,16 @@ export const metadata: Metadata = {
   publisher: "ChauffeurTop",
   icons: {
     icon: '/logo/fav.ico',
+    apple: '/logo/fav.ico',
+  },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'ChauffeurTop',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
   },
   openGraph: {
     type: "website",
@@ -121,6 +131,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* PWA Theme Color */}
+        <meta name="theme-color" content="#C5A572" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="apple-touch-icon" href="/logo/fav.ico" />
+        
         {/* LocalBusiness Schema for SEO */}
         <script
           type="application/ld+json"

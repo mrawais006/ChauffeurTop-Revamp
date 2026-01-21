@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const ADMIN_EMAIL = 'bookings@chauffeurtop.com.au';
+// IMPORTANT: Admin receives at different email than FROM to avoid Resend suppression
+const ADMIN_EMAIL = 'admin@chauffeurtop.com.au';
 
 export async function POST(request: Request) {
   try {

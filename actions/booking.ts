@@ -192,7 +192,8 @@ async function sendBookingNotification(quoteData: any): Promise<void> {
 
     // Send admin notification directly via Resend API
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const ADMIN_EMAIL = 'bookings@chauffeurtop.com.au';
+    // IMPORTANT: Admin receives at different email than FROM to avoid Resend suppression
+    const ADMIN_EMAIL = 'admin@chauffeurtop.com.au';
     
     if (RESEND_API_KEY) {
       try {
