@@ -24,6 +24,14 @@ export function filterQuotes(quotes: Quote[], filters: QuoteFilters): Quote[] {
       return false;
     }
 
+    // Lead source filter
+    if (filters.leadSource !== 'all') {
+      const quoteSource = quote.lead_source?.source || 'website';
+      if (quoteSource !== filters.leadSource) {
+        return false;
+      }
+    }
+
     // Date range filter
     if (filters.dateFrom) {
       const quoteDate = new Date(quote.created_at);
@@ -126,6 +134,7 @@ export function countActiveQuoteFilters(filters: QuoteFilters): number {
   if (filters.status !== 'all') count++;
   if (filters.serviceType !== 'all') count++;
   if (filters.vehicleType !== 'all') count++;
+  if (filters.leadSource !== 'all') count++;
   if (filters.dateFrom || filters.dateTo) count++;
   if (filters.priceMin !== null || filters.priceMax !== null) count++;
   return count;
@@ -148,6 +157,7 @@ export function getDefaultQuoteFilters(): QuoteFilters {
     priceMin: null,
     priceMax: null,
     vehicleType: 'all',
+    leadSource: 'all',
   };
 }
 
