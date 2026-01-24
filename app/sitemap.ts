@@ -81,10 +81,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // Ads/Landing pages - for Google Ads campaigns
+  // Note: These pages are noindex but still need to be accessible for AdsBot validation
   const adsPages: MetadataRoute.Sitemap = [
     'melbourne-airport-transfer',
+    'melbourne-airport-transfer-v2',
     'corporate-transfer',
     'family-transfer',
+    'thank-you', // Post-conversion page
   ].map((slug) => ({
     url: `${baseUrl}/ads/${slug}`,
     lastModified: new Date(),

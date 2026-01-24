@@ -1,0 +1,56 @@
+# ChauffeurTop robots.txt
+# Static fallback for Google Ads Bot compliance
+# Primary configuration is in app/robots.ts (Next.js dynamic)
+
+# Google Ads Bot - CRITICAL for ad destination page validation
+# AdsBot-Google checks desktop ad destinations
+User-agent: AdsBot-Google
+Allow: /ads/
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# AdsBot-Google-Mobile - checks mobile ad destinations (Android/iOS)
+# This is the bot that was returning 404 errors
+User-agent: AdsBot-Google-Mobile
+Allow: /ads/
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# AdsBot-Google-Mobile-Apps - for in-app ad destinations
+User-agent: AdsBot-Google-Mobile-Apps
+Allow: /ads/
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Main Googlebot crawler
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /confirm-booking/
+Disallow: /api/
+Disallow: /blogs/preview/
+
+# Googlebot Mobile (smartphone crawler)
+User-agent: Googlebot-Mobile
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /confirm-booking/
+Disallow: /api/
+Disallow: /blogs/preview/
+
+# All other crawlers
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /login
+Disallow: /confirm-booking/
+Disallow: /api/
+Disallow: /blogs/preview/
+
+# Sitemap location
+Sitemap: https://chauffeurtop.com.au/sitemap.xml
