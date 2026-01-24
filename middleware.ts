@@ -54,8 +54,8 @@ export function middleware(request: NextRequest) {
     // Default: only allow same origin
     "default-src 'self'",
     
-    // Scripts: self, inline (needed for Next.js), GTM, Google Analytics, Google Maps
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://maps.googleapis.com https://maps.gstatic.com",
+    // Scripts: self, inline (needed for Next.js), GTM, Google Analytics, Google Maps, Google Ads
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://googleads.g.doubleclick.net https://maps.googleapis.com https://maps.gstatic.com",
     
     // Styles: self, inline (needed for styled components/Tailwind), Google Fonts
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
@@ -66,8 +66,8 @@ export function middleware(request: NextRequest) {
     // Images: self, data URIs, HTTPS sources, Supabase storage
     "img-src 'self' data: https: blob:",
     
-    // Connect: self, Supabase, Google Analytics, Google Maps
-    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google-analytics.com https://maps.googleapis.com https://www.googletagmanager.com",
+    // Connect: self, Supabase, Google Analytics, Google Maps, Google Ads
+    "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.google.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net https://maps.googleapis.com https://www.googletagmanager.com",
     
     // Frames: Google Maps, GTM
     "frame-src 'self' https://www.google.com https://www.googletagmanager.com",
