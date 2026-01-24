@@ -137,6 +137,7 @@ function QuotesTable({ quotes, showReminder = false, onQuoteUpdate, onQuoteDelet
             onViewDetails={() => handleViewDetails(quote)}
             onDelete={() => handleDeleteClick(quote.id)}
             onQuoteUpdate={onQuoteUpdate}
+            showReminder={showReminder}
           />
         ))}
       </div>

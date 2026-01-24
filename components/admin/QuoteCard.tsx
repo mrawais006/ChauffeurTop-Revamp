@@ -4,8 +4,9 @@ import { memo, useState } from 'react';
 import type { Quote } from '@/types/admin';
 import { format, isValid } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Bell } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SendReminderDialog } from './SendReminderDialog';
 import { updateQuoteStatus } from '@/lib/admin';
 import { toast } from 'sonner';
 
@@ -14,6 +15,7 @@ interface QuoteCardProps {
   onViewDetails: () => void;
   onDelete?: () => void;
   onQuoteUpdate?: (quoteId: string, updates: Partial<Quote>) => void;
+  showReminder?: boolean;
 }
 
 // Melbourne timezone constant
@@ -35,8 +37,9 @@ const safeFormatDate = (dateStr: string, formatStr: string, timezone?: string): 
   }
 };
 
-function QuoteCard({ quote, onViewDetails, onDelete, onQuoteUpdate }: QuoteCardProps) {
+function QuoteCard({ quote, onViewDetails, onDelete, onQuoteUpdate, showReminder = false }: QuoteCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showReminderDialog, setShowReminderDialog] = useState(false);
 
   // Format pickup date and time
   const formatPickupDateTime = () => {
@@ -209,6 +212,16 @@ function QuoteCard({ quote, onViewDetails, onDelete, onQuoteUpdate }: QuoteCardP
           >
             View Details
           </button>
+          {/* Reminder Button - only show for upcoming confirmed bookings */}
+          {showReminder && quote.status === 'confirmed' && (
+            <button
+              onClick={() => setShowReminderDialog(true)}
+              className="p-2 text-amber-600 bg-amber-50 border border-amber-200 rounded-md hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors"
+              title="Send Reminder"
+            >
+              <Bell className="h-4 w-4" />
+            </button>
+          )}
           {onDelete && (
             <button
               onClick={onDelete}
@@ -219,6 +232,21 @@ function QuoteCard({ quote, onViewDetails, onDelete, onQuoteUpdate }: QuoteCardP
           )}
         </div>
       </div>
+
+      {/* Reminder Dialog */}
+      {showReminder && onQuoteUpdate && (
+        <SendReminderDialog
+          open={showReminderDialog}
+          onOpenChange={setShowReminderDialog}
+          booking={quote}
+          onSuccess={() => {
+            onQuoteUpdate(quote.id, {
+              reminder_count: (quote.reminder_count || 0) + 1,
+              last_reminder_sent: new Date().toISOString()
+            });
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -230,6 +258,7 @@ export default memo(QuoteCard, (prevProps, nextProps) => {
   if (prevProps.quote.quoted_price !== nextProps.quote.quoted_price) return false;
   if (prevProps.quote.follow_up_count !== nextProps.quote.follow_up_count) return false;
   if (prevProps.quote.last_follow_up_at !== nextProps.quote.last_follow_up_at) return false;
+  if (prevProps.showReminder !== nextProps.showReminder) return false;
   return true;
 });
 
