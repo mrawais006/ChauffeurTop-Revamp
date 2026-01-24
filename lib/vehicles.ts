@@ -21,7 +21,7 @@ export const vehicles: Vehicle[] = [
   {
     category: 'executive_sedan',
     name: 'Executive Sedans',
-    models: 'Holden Caprice, Chrysler 300C, Genesis',
+    models: 'Mercedes-Benz E-Class, BMW 5 Series, Audi A6 or similar',
     description: 'Ideal for 1-3 passengers, combining elegance with comfort for business and leisure.',
     passengers: 3,
     luggage: 2,

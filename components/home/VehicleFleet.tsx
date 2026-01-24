@@ -10,7 +10,7 @@ import { saveVehicleSelection } from "@/lib/formPrePopulation";
 const vehicles = {
     sedan: {
         title: "Executive Sedans",
-        models: "Lexus ES | Mercedes-Benz E-Class",
+        models: "Mercedes-Benz E-Class | BMW 5 Series | Audi A6 or similar",
         description: "Perfect for private airport transfers—arrive with quiet comfort and discretion.",
         image: "/fleet/vehicle_sedan.png"
     },

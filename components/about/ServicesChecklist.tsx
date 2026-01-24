@@ -78,7 +78,7 @@ const ServicesChecklist = () => {
                         </p>
 
                         <p className="text-gray-700 leading-relaxed">
-                            With fully qualified VHA-accredited chauffeurs, we service all of Victoria with a premium fleet ranging from the refined Holden Caprice to the prestigious Bentley Flying Spur and more.
+                            With fully qualified VHA-accredited chauffeurs, we service all of Victoria with a premium fleet ranging from the Mercedes-Benz E-Class and BMW 5 Series to the prestigious Mercedes S-Class and more.
                         </p>
                     </motion.div>
                 </div>
