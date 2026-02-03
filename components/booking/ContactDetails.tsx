@@ -137,6 +137,11 @@ export default function ContactDetails({ onPhoneChange, selectedVehicle, default
           </div>
           <p className="mt-2 text-sm text-luxury-black/60">
             {selectedCountry.flag} {selectedCountry.name}: {selectedCountry.dialCode} {selectedCountry.placeholder}
+            {selectedCountry.code === 'AU' && (
+              <span className="block text-xs text-luxury-black/50 mt-1">
+                No need to enter the leading 0 - it&apos;s included in +61
+              </span>
+            )}
           </p>
         </div>
 

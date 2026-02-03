@@ -267,11 +267,17 @@ export function getCountryByDialCode(dialCode: string): Country | undefined {
 // Format phone number based on country
 export function formatPhoneForCountry(phone: string, country: Country): string {
   // Remove all non-digits
-  const digits = phone.replace(/\D/g, '');
-  
+  let digits = phone.replace(/\D/g, '');
+
+  // For Australian numbers, strip leading 0 since +61 replaces it
+  // This prevents users from accidentally entering 0412... when +61 is already selected
+  if (country.code === 'AU' && digits.startsWith('0')) {
+    digits = digits.substring(1);
+  }
+
   // Limit to max length
   const limited = digits.substring(0, country.maxLength);
-  
+
   // Basic formatting - add spaces every 3-4 digits
   if (limited.length <= 3) return limited;
   if (limited.length <= 6) return `${limited.substring(0, 3)} ${limited.substring(3)}`;
