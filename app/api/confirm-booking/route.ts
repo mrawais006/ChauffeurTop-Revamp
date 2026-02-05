@@ -4,6 +4,143 @@ import { supabaseAdmin } from '@/lib/supabase';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://chauffeurtop.com.au';
 const ADMIN_EMAIL = 'admin@chauffeurtop.com.au';
 
+// Direct Resend API call for customer confirmation email
+async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    
+    if (!RESEND_API_KEY) {
+        console.error('[Customer Confirmation] Missing RESEND_API_KEY');
+        return false;
+    }
+
+    if (!quote.email) {
+        console.error('[Customer Confirmation] No customer email address');
+        return false;
+    }
+
+    const emailHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Booking Confirmed!</title>
+      <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; background: #f9fafb; }
+        .container { max-width: 600px; margin: 0 auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
+        .header { background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); padding: 30px 20px; text-align: center; }
+        .header h1 { color: #1A1F2C; margin: 0; font-size: 24px; font-weight: 700; }
+        .content { padding: 40px 30px; }
+        .ref-box { text-align: center; padding: 20px; background: #fef3c7; border-radius: 8px; margin-bottom: 25px; border: 1px solid #C5A572; }
+        .ref-label { margin: 0; color: #92400e; font-size: 13px; text-transform: uppercase; }
+        .ref-code { margin: 5px 0 0 0; color: #1f2937; font-size: 24px; font-weight: 800; letter-spacing: 1px; }
+        .details { border: 1px solid #C5A572; border-radius: 8px; padding: 25px; margin: 25px 0; }
+        .details h2 { color: #111827; margin: 0 0 20px 0; font-size: 20px; font-weight: 700; }
+        .info { margin: 8px 0; color: #4b5563; font-size: 15px; }
+        .info strong { color: #1f2937; font-weight: 600; }
+        .divider { margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb; }
+        .price { font-size: 20px; font-weight: 800; color: #C5A572; }
+        .next-steps { background: #fdfbf7; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #e7e5e4; }
+        .next-steps h3 { margin: 0 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 700; }
+        .next-steps ul { margin: 0; padding-left: 20px; color: #4b5563; }
+        .next-steps li { margin-bottom: 8px; }
+        .contact { text-align: center; margin-top: 30px; }
+        .contact p { color: #6b7280; font-size: 14px; margin: 5px 0; }
+        .contact a { color: #C5A572; text-decoration: none; font-weight: 600; }
+        .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Booking Confirmed! ✅</h1>
+        </div>
+
+        <div class="content">
+          <p style="font-size: 18px; color: #1f2937; margin-bottom: 20px;">Dear ${quote.name},</p>
+          
+          <p style="color: #4b5563; line-height: 1.6; margin-bottom: 25px;">
+            Your booking has been successfully confirmed. We are excited to provide you with our premium chauffeur service!
+          </p>
+
+          <div class="ref-box">
+            <p class="ref-label">Booking Reference</p>
+            <p class="ref-code">#${quote.id.substring(0, 8).toUpperCase()}</p>
+          </div>
+
+          <div class="details">
+            <h2>Your Trip Details</h2>
+            
+            <p class="info"><strong>Date:</strong> ${new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p class="info"><strong>Time:</strong> ${quote.time}</p>
+            <p class="info"><strong>Pickup:</strong> ${quote.pickup_location}</p>
+            <p class="info"><strong>Destination:</strong> ${quote.destinations?.[0] || quote.dropoff_location || 'As instructed'}</p>
+            
+            <div class="divider">
+               <p class="info"><strong>Vehicle:</strong> ${quote.vehicle_name || quote.vehicle_type}</p>
+               <p class="info"><strong>Passengers:</strong> ${quote.passengers}</p>
+            </div>
+            
+            <div class="divider" style="display: flex; justify-content: space-between; align-items: center;">
+               <strong style="font-size: 16px;">Total Paid</strong>
+               <span class="price">$${(quote.quoted_price || 0).toFixed(2)}</span>
+            </div>
+          </div>
+
+          <div class="next-steps">
+            <h3>What Happens Next?</h3>
+            <ul>
+              <li>We'll contact you 24 hours before your pickup to confirm details</li>
+              <li>Your chauffeur will arrive 10 minutes before scheduled time</li>
+              <li>You'll receive a reminder SMS on the day</li>
+            </ul>
+          </div>
+
+          <div class="contact">
+            <p>Need to make changes?</p>
+            <p><a href="tel:+61430240945">+61 430 240 945</a></p>
+            <p><a href="mailto:bookings@chauffeurtop.com.au">bookings@chauffeurtop.com.au</a></p>
+          </div>
+        </div>
+
+        <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} ChauffeurTop. All rights reserved.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    `;
+
+    try {
+        const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${RESEND_API_KEY}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                from: 'ChauffeurTop <bookings@chauffeurtop.com.au>',
+                to: [quote.email],
+                reply_to: ['bookings@chauffeurtop.com.au'],
+                subject: `✅ Booking Confirmed - ${new Date(quote.date).toLocaleDateString('en-AU')}`,
+                html: emailHtml,
+            }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('[Customer Confirmation] Resend API error:', response.status, errorText);
+            return false;
+        }
+
+        console.log('[Customer Confirmation] ✅ Email sent successfully to:', quote.email);
+        return true;
+    } catch (error) {
+        console.error('[Customer Confirmation] Direct send failed:', error);
+        return false;
+    }
+}
+
 // Direct Resend API call for admin notification (fallback if Edge Function fails)
 async function sendAdminNotificationDirect(quote: any): Promise<boolean> {
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
@@ -182,11 +319,18 @@ export async function GET(request: NextRequest) {
           .catch(e => console.error('[Confirm Booking] Activity log error:', e));
 
         // Fire all notifications in parallel (non-blocking for fast confirmation)
-        // Customer email via Edge Function
-        Promise.resolve(supabase.functions.invoke('send-confirmation-email', {
-            body: { quote: quote, type: 'customer' }
-        })).then(() => console.log('[Confirm Booking] Customer email sent via Edge Function'))
-          .catch(e => console.error('[Confirm Booking] Customer email error:', e));
+        // Customer email - Use direct Resend API for reliability
+        sendCustomerConfirmationDirect(quote)
+            .then(success => {
+                if (!success) {
+                    // Fallback to Edge Function if direct send fails
+                    console.log('[Confirm Booking] Trying Edge Function fallback for customer email...');
+                    return supabase.functions.invoke('send-confirmation-email', {
+                        body: { quote: quote, type: 'customer' }
+                    });
+                }
+            })
+            .catch(e => console.error('[Confirm Booking] Customer email error:', e));
 
         // Admin email - Use direct Resend API for reliability (bypasses Edge Function issues)
         sendAdminNotificationDirect(quote)
