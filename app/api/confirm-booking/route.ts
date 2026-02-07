@@ -141,7 +141,7 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
     }
 }
 
-// Direct Resend API call for admin notification (fallback if Edge Function fails)
+// Direct Resend API call for admin notification
 async function sendAdminNotificationDirect(quote: any): Promise<boolean> {
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
     
@@ -243,25 +243,51 @@ async function sendAdminNotificationDirect(quote: any): Promise<boolean> {
     }
 }
 
+// ============================================================
+// GET handler: SAFE for email scanners - only redirects to page
+// Email scanners can hit this all day and nothing will be confirmed
+// ============================================================
 export async function GET(request: NextRequest) {
-    // Check if admin client is available (requires SUPABASE_SERVICE_ROLE_KEY)
+    const searchParams = request.nextUrl.searchParams;
+    const token = searchParams.get('token');
+
+    if (!token) {
+        return NextResponse.redirect(
+            new URL('/confirm-booking/error?reason=missing_token', request.url)
+        );
+    }
+
+    // Simply redirect to the confirmation page - NO state changes here
+    // The page will show booking details and a "Confirm" button (POST)
+    return NextResponse.redirect(
+        new URL(`/confirm-booking/${token}`, request.url)
+    );
+}
+
+// ============================================================
+// POST handler: Actually confirms the booking
+// Only triggered by explicit user action (button click on the page)
+// Email scanners NEVER send POST requests
+// ============================================================
+export async function POST(request: NextRequest) {
     if (!supabaseAdmin) {
         console.error('[Confirm Booking] Internal Error: SUPABASE_SERVICE_ROLE_KEY is missing');
-        return NextResponse.redirect(
-            new URL('/confirm-booking/error?reason=server_configuration_error', request.url)
+        return NextResponse.json(
+            { error: 'Server configuration error' },
+            { status: 500 }
         );
     }
 
     const supabase = supabaseAdmin;
 
     try {
-        const searchParams = request.nextUrl.searchParams;
-        const token = searchParams.get('token');
+        const body = await request.json();
+        const token = body.token;
 
-        // Validate token parameter
         if (!token) {
-            return NextResponse.redirect(
-                new URL('/confirm-booking/error?reason=missing_token', request.url)
+            return NextResponse.json(
+                { error: 'Missing confirmation token' },
+                { status: 400 }
             );
         }
 
@@ -274,16 +300,18 @@ export async function GET(request: NextRequest) {
 
         if (fetchError || !quote) {
             console.error('[Confirm Booking] Quote not found:', fetchError);
-            return NextResponse.redirect(
-                new URL('/confirm-booking/error?reason=invalid_token', request.url)
+            return NextResponse.json(
+                { error: 'Booking not found' },
+                { status: 404 }
             );
         }
 
         // Check if booking is already confirmed
         if (quote.status === 'confirmed' || quote.status === 'completed') {
             console.log('[Confirm Booking] Booking already confirmed:', quote.id);
-            return NextResponse.redirect(
-                new URL(`/confirm-booking/${token}?already_confirmed=true`, request.url)
+            return NextResponse.json(
+                { success: true, already_confirmed: true },
+                { status: 200 }
             );
         }
 
@@ -293,37 +321,33 @@ export async function GET(request: NextRequest) {
             .update({
                 status: 'confirmed',
                 quote_accepted_at: new Date().toISOString(),
-                // We keep the token so that if the user clicks the link again, 
-                // we can identify the booking and show "Already Confirmed" instead of "Invalid Link"
-                // confirmation_token: null 
             })
             .eq('id', quote.id);
 
         if (updateError) {
             console.error('[Confirm Booking] Update error:', updateError);
-            return NextResponse.redirect(
-                new URL('/confirm-booking/error?reason=update_failed', request.url)
+            return NextResponse.json(
+                { error: 'Failed to confirm booking' },
+                { status: 500 }
             );
         }
 
-        // Log the confirmation activity (fire-and-forget - non-blocking)
+        // Log the confirmation activity (fire-and-forget)
         Promise.resolve(supabase.from('quote_activities').insert({
             quote_id: quote.id,
             action_type: 'customer_confirmed',
             details: {
                 confirmed_at: new Date().toISOString(),
                 confirmed_price: quote.quoted_price,
-                confirmation_method: 'email_link'
+                confirmation_method: 'email_link_post'
             }
         })).then(() => console.log('[Confirm Booking] Activity logged'))
           .catch(e => console.error('[Confirm Booking] Activity log error:', e));
 
-        // Fire all notifications in parallel (non-blocking for fast confirmation)
-        // Customer email - Use direct Resend API for reliability
+        // Customer email
         sendCustomerConfirmationDirect(quote)
             .then(success => {
                 if (!success) {
-                    // Fallback to Edge Function if direct send fails
                     console.log('[Confirm Booking] Trying Edge Function fallback for customer email...');
                     return supabase.functions.invoke('send-confirmation-email', {
                         body: { quote: quote, type: 'customer' }
@@ -332,11 +356,10 @@ export async function GET(request: NextRequest) {
             })
             .catch(e => console.error('[Confirm Booking] Customer email error:', e));
 
-        // Admin email - Use direct Resend API for reliability (bypasses Edge Function issues)
+        // Admin email
         sendAdminNotificationDirect(quote)
             .then(success => {
                 if (!success) {
-                    // Fallback to Edge Function if direct send fails
                     console.log('[Confirm Booking] Trying Edge Function fallback for admin email...');
                     return supabase.functions.invoke('send-confirmation-email', {
                         body: { quote: quote, type: 'admin' }
@@ -373,8 +396,7 @@ export async function GET(request: NextRequest) {
 
         console.log('[Confirm Booking] Success:', quote.id);
 
-        // Handle Split Booking for Return Trips (fire-and-forget - non-blocking)
-        // We do this AFTER sending emails so the customer gets the full itinerary in their confirmation email
+        // Handle Split Booking for Return Trips (fire-and-forget)
         const destinations = quote.destinations as any;
         
         if (destinations && typeof destinations === 'object' && !Array.isArray(destinations) && destinations.type === 'return_trip') {
@@ -384,7 +406,6 @@ export async function GET(request: NextRequest) {
             const returnDetails = destinations.return;
 
             if (outboundDetails && returnDetails) {
-                // Fire-and-forget: Update outbound leg
                 supabase.from('quotes')
                     .update({
                         trip_leg: 'outbound',
@@ -403,7 +424,6 @@ export async function GET(request: NextRequest) {
                         else console.log('[Confirm Booking] Updated original booking to outbound leg');
                     });
 
-                // Fire-and-forget: Create return leg
                 const { id, created_at, updated_at, confirmation_token, ...baseQuoteData } = quote;
                 supabase.from('quotes')
                     .insert({
@@ -427,15 +447,16 @@ export async function GET(request: NextRequest) {
             }
         }
 
-        // Redirect immediately to success page (all background tasks are fire-and-forget)
-        return NextResponse.redirect(
-            new URL(`/confirm-booking/${token}?success=true`, request.url)
+        return NextResponse.json(
+            { success: true, quote_id: quote.id },
+            { status: 200 }
         );
 
     } catch (error) {
         console.error('[Confirm Booking] Unexpected error:', error);
-        return NextResponse.redirect(
-            new URL('/confirm-booking/error?reason=server_error', request.url)
+        return NextResponse.json(
+            { error: 'Server error' },
+            { status: 500 }
         );
     }
 }

@@ -269,7 +269,8 @@ function generateBookingReceivedEmail(quote: any): string {
 }
 
 function generateQuoteResponseEmail(quote: any, priceBreakdown: any, type: string, confirmationToken: string): string {
-  const confirmationLink = `${SITE_URL}/api/confirm-booking?token=${confirmationToken}&type=${type}`;
+  // Link to the confirmation PAGE (not API) - prevents email scanner auto-confirmation
+  const confirmationLink = `${SITE_URL}/confirm-booking/${confirmationToken}`;
   const formattedDate = new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const totalAmount = priceBreakdown?.total || quote.quoted_price || 0;
 

@@ -49,7 +49,7 @@ serve(async (req: Request) => {
     }
 
     const confirmationUrl = confirmationToken
-      ? `${SITE_URL}/api/confirm-booking?token=${confirmationToken}`
+      ? `${SITE_URL}/confirm-booking/${confirmationToken}`
       : null;
 
     let emailHtml = '';
