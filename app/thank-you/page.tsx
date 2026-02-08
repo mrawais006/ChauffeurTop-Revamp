@@ -36,10 +36,10 @@ export default function ThankYouPage() {
         </h1>
         
         <p className="text-xl text-white/70 mb-2">
-          Your message has been received successfully.
+          Your quote request has been received successfully.
         </p>
         <p className="text-lg text-luxury-gold mb-8">
-          We'll get back to you within 24 hours.
+          Our team will review your details and send you a personalised quote shortly.
         </p>
 
         {/* Decorative Line */}

@@ -81,7 +81,7 @@ async function sendCustomerConfirmation(apiKey: string, quote: any) {
           <p style="font-size: 18px; color: #1f2937; margin-bottom: 20px;">Dear ${quote.name},</p>
           
           <p style="color: #4b5563; line-height: 1.6; margin-bottom: 25px;">
-            Your booking has been successfully confirmed. We are excited to provide you with our premium chauffeur service!
+            Great news — your booking has been confirmed! Our team is now preparing to deliver a premium chauffeur experience for you.
           </p>
 
           <div style="text-align: center; padding: 20px; background: #fef3c7; border-radius: 8px; margin-bottom: 25px; border: 1px solid #C5A572;">
@@ -104,7 +104,7 @@ async function sendCustomerConfirmation(apiKey: string, quote: any) {
             </div>
             
             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center;">
-               <span class="info-label" style="font-size: 16px;">Total Paid</span>
+               <span class="info-label" style="font-size: 16px;">Total Payable</span>
                <span style="font-size: 20px; font-weight: 800; color: #C5A572;">$${quote.quoted_price.toFixed(2)}</span>
             </div>
           </div>
@@ -113,9 +113,10 @@ async function sendCustomerConfirmation(apiKey: string, quote: any) {
           <div style="background-color: #fdfbf7; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #e7e5e4;">
             <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 700;">What Happens Next?</h3>
             <ul style="margin: 0; padding-left: 20px; color: #4b5563;">
-              <li style="margin-bottom: 8px;">We'll contact you 24 hours before your pickup to confirm details</li>
-              <li style="margin-bottom: 8px;">Your chauffeur will arrive 10 minutes before scheduled time</li>
-              <li style="margin-bottom: 8px;">You'll receive a reminder SMS on the day</li>
+              <li style="margin-bottom: 8px;">Our team will be in touch to finalise payment and any remaining details</li>
+              <li style="margin-bottom: 8px;">We'll contact you 24 hours before your pickup to reconfirm</li>
+              <li style="margin-bottom: 8px;">Your chauffeur will arrive 10 minutes before the scheduled time</li>
+              <li style="margin-bottom: 8px;">You'll receive a reminder SMS on the day of your trip</li>
             </ul>
           </div>
 

@@ -335,7 +335,7 @@ export default function LandingPageForm({ preSelectedService, source = 'landing_
 
         <p className="text-sm text-center text-luxury-black/60 leading-relaxed">
           By submitting this form, you agree to our terms and conditions. 
-          Your booking will be confirmed upon review by our team.
+          Our team will review your request and send you a personalised quote shortly.
         </p>
       </form>
     </div>

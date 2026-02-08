@@ -60,7 +60,7 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
           <p style="font-size: 18px; color: #1f2937; margin-bottom: 20px;">Dear ${quote.name},</p>
           
           <p style="color: #4b5563; line-height: 1.6; margin-bottom: 25px;">
-            Your booking has been successfully confirmed. We are excited to provide you with our premium chauffeur service!
+            Great news — your booking has been confirmed! Our team is now preparing to deliver a premium chauffeur experience for you.
           </p>
 
           <div class="ref-box">
@@ -82,7 +82,7 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
             </div>
             
             <div class="divider" style="display: flex; justify-content: space-between; align-items: center;">
-               <strong style="font-size: 16px;">Total Paid</strong>
+               <strong style="font-size: 16px;">Total Payable</strong>
                <span class="price">$${(quote.quoted_price || 0).toFixed(2)}</span>
             </div>
           </div>
@@ -90,9 +90,10 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
           <div class="next-steps">
             <h3>What Happens Next?</h3>
             <ul>
-              <li>We'll contact you 24 hours before your pickup to confirm details</li>
-              <li>Your chauffeur will arrive 10 minutes before scheduled time</li>
-              <li>You'll receive a reminder SMS on the day</li>
+              <li>Our team will be in touch to finalise payment and any remaining details</li>
+              <li>We'll contact you 24 hours before your pickup to reconfirm</li>
+              <li>Your chauffeur will arrive 10 minutes before the scheduled time</li>
+              <li>You'll receive a reminder SMS on the day of your trip</li>
             </ul>
           </div>
 
@@ -374,7 +375,7 @@ export async function POST(request: NextRequest) {
         const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
 
         if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER && quote.phone) {
-            const smsBody = `Booking Confirmed! ✅\nHi ${quote.name}, your ChauffeurTop booking for ${new Date(quote.date).toLocaleDateString('en-AU')} is confirmed. We will contact you 24hrs before pickup. Ref: #${quote.id.substring(0, 8).toUpperCase()}`;
+            const smsBody = `Booking Confirmed! ✅\nHi ${quote.name}, your ChauffeurTop booking for ${new Date(quote.date).toLocaleDateString('en-AU')} is confirmed. Our team will be in touch to arrange payment and final details. Ref: #${quote.id.substring(0, 8).toUpperCase()}`;
 
             const params = new URLSearchParams();
             params.append('To', quote.phone);

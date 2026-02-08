@@ -69,7 +69,7 @@ serve(async (req: Request) => {
         reply_to: ['bookings@chauffeurtop.com.au'],
         to: [quote.email],
         subject: type === 'booking_received' 
-          ? `Your Booking Request - ChauffeurTop`
+          ? `Quote Request Received - ChauffeurTop`
           : `Your Quote from ChauffeurTop - $${(priceBreakdown?.total || quote.quoted_price || 0).toFixed(2)}`,
         html: emailHtml,
       }),
@@ -92,10 +92,10 @@ serve(async (req: Request) => {
       if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER && quote.phone) {
         console.log('Sending SMS via Twilio to:', quote.phone);
 
-        let smsBody = `Hi ${quote.name}, your booking request with ChauffeurTop has been received. Please check your email for the quote and confirmation link.`;
+        let smsBody = `Hi ${quote.name}, your personalised quote from ChauffeurTop is ready! Please check your email to review the details and confirm your booking.`;
         
         if (type === 'booking_received') {
-          smsBody = `Hi ${quote.name}, thanks for booking with ChauffeurTop! We've received your request and will send you a quote shortly.`;
+          smsBody = `Hi ${quote.name}, thanks for choosing ChauffeurTop! We've received your quote request and will send you a personalised quote shortly.`;
         }
         
         // Transform headers for x-www-form-urlencoded
@@ -208,16 +208,16 @@ function generateBookingReceivedEmail(quote: any): string {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Your Booking Request - ChauffeurTop</h1>
+            <h1>Quote Request Received - ChauffeurTop</h1>
           </div>
           <div class="content">
             <p class="greeting">Dear ${quote.name},</p>
             <p class="intro">
-              Thank you for choosing ChauffeurTop. We have received your booking request and our team will review it shortly.
+              Thank you for choosing ChauffeurTop. We have received your quote request and our team is reviewing your details. You will receive a personalised quote from us shortly.
             </p>
             
             <div class="details-container">
-              <h2 class="details-title">Your Booking Details:</h2>
+              <h2 class="details-title">Your Request Details:</h2>
               
               <p class="info-line"><span class="info-label">Date:</span> ${formattedDate}</p>
               <p class="info-line"><span class="info-label">Time:</span> ${quote.time} Melbourne local time (AEST/AEDT)</p>
@@ -255,7 +255,7 @@ function generateBookingReceivedEmail(quote: any): string {
             </div>
 
             <p style="text-align: center; color: #6b7280; font-size: 14px;">
-              We will send you a formal quote and confirmation link shortly.
+              We will review your request and send you a personalised quote with a confirmation link shortly.
             </p>
 
           </div>
@@ -303,14 +303,14 @@ function generateQuoteResponseEmail(quote: any, priceBreakdown: any, type: strin
           <div class="content">
             <p class="greeting">Dear ${quote.name},</p>
             <p class="intro">
-              Thank you for choosing ChauffeurTop. Use the link below to confirm your booking at this exclusive price.
+              Thank you for choosing ChauffeurTop. We have prepared your personalised quote below. If you're happy with the price, simply click the button to confirm your booking.
             </p>
 
              <div class="details-container">
               <h2 class="details-title">Your Quote Details:</h2>
               
               <div style="text-align: center; padding: 20px; background: #fef3c7; border-radius: 8px; margin-bottom: 20px;">
-                <span style="font-size: 14px; color: #92400e; text-transform: uppercase; font-weight: bold;">Total Price</span>
+                <span style="font-size: 14px; color: #92400e; text-transform: uppercase; font-weight: bold;">Quoted Price</span>
                 <div style="font-size: 32px; font-weight: 800; color: #b45309;">$${totalAmount.toFixed(2)}</div>
               </div>
 

@@ -227,7 +227,7 @@ export default function ConfirmBookingPage() {
                     <div className="bg-black/50 backdrop-blur-md py-8 px-6 sm:px-8 shadow-2xl sm:rounded-xl border border-luxury-gold/20">
                         {/* Price Highlight */}
                         <div className="text-center mb-6 p-4 bg-gradient-to-r from-luxury-gold/10 via-luxury-gold/20 to-luxury-gold/10 rounded-lg border border-luxury-gold/30">
-                            <p className="text-luxury-gold/60 text-xs uppercase tracking-widest mb-1">Total Price</p>
+                            <p className="text-luxury-gold/60 text-xs uppercase tracking-widest mb-1">Quoted Price</p>
                             <p className="text-4xl font-bold text-luxury-gold">
                                 ${(quote.quoted_price || 0).toFixed(2)}
                             </p>
@@ -299,7 +299,7 @@ export default function ConfirmBookingPage() {
                         </button>
 
                         <p className="text-center text-white/40 text-xs">
-                            By confirming, you agree to the quoted price and service terms.
+                            By confirming, you agree to the quoted price and our service terms. Our team will be in touch to arrange payment.
                         </p>
 
                         {/* Contact */}
@@ -342,8 +342,8 @@ export default function ConfirmBookingPage() {
                     <div className="w-48 h-1 bg-gradient-to-r from-transparent via-luxury-gold to-transparent mx-auto mb-4"></div>
                     <p className="text-luxury-gold/70 font-serif text-sm">
                         {pageState === 'already_confirmed'
-                            ? 'This booking has already been confirmed. You should have received a confirmation email.'
-                            : 'Thank you for confirming your booking with ChauffeurTop!'
+                            ? 'This booking has already been confirmed. You should have received a confirmation email with your details.'
+                            : 'Thank you for confirming your booking with ChauffeurTop! Our team will be in touch to finalise payment and details.'
                         }
                     </p>
                 </div>
@@ -353,7 +353,7 @@ export default function ConfirmBookingPage() {
                     <div className="text-center mb-8">
                         <p className="text-white/90 text-base leading-relaxed">
                             {pageState === 'success'
-                                ? 'You will receive a confirmation email shortly with all your booking details.'
+                                ? 'You will receive a confirmation email shortly with your booking details and the total payable amount. Our team will contact you to arrange payment before your trip.'
                                 : 'If you need any changes, please contact us directly.'
                             }
                         </p>
