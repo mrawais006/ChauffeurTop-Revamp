@@ -25,15 +25,18 @@ export async function POST(request: NextRequest) {
                 // Email was opened - increment open count for matching campaigns
                 console.log(`[Resend Webhook] Email opened by: ${data?.to}`);
                 if (data?.tags?.campaign_id) {
-                    await supabaseAdmin.rpc('increment_campaign_opens', {
-                        campaign_uuid: data.tags.campaign_id,
-                    }).catch(() => {
-                        // Fallback: direct update
-                        supabaseAdmin
+                    const { data: campaign } = await supabaseAdmin
+                        .from('marketing_campaigns')
+                        .select('open_count')
+                        .eq('id', data.tags.campaign_id)
+                        .single();
+
+                    if (campaign) {
+                        await supabaseAdmin
                             .from('marketing_campaigns')
-                            .update({ open_count: supabaseAdmin.rpc('', {}) })
+                            .update({ open_count: (campaign.open_count || 0) + 1 })
                             .eq('id', data.tags.campaign_id);
-                    });
+                    }
                 }
                 break;
 
@@ -41,19 +44,18 @@ export async function POST(request: NextRequest) {
                 // Link was clicked
                 console.log(`[Resend Webhook] Link clicked by: ${data?.to}`);
                 if (data?.tags?.campaign_id) {
-                    await supabaseAdmin
+                    const { data: clickCampaign } = await supabaseAdmin
                         .from('marketing_campaigns')
                         .select('click_count')
                         .eq('id', data.tags.campaign_id)
-                        .single()
-                        .then(({ data: campaign }) => {
-                            if (campaign) {
-                                supabaseAdmin
-                                    .from('marketing_campaigns')
-                                    .update({ click_count: (campaign.click_count || 0) + 1 })
-                                    .eq('id', data.tags.campaign_id);
-                            }
-                        });
+                        .single();
+
+                    if (clickCampaign) {
+                        await supabaseAdmin
+                            .from('marketing_campaigns')
+                            .update({ click_count: (clickCampaign.click_count || 0) + 1 })
+                            .eq('id', data.tags.campaign_id);
+                    }
                 }
                 break;
 
