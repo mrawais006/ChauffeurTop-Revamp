@@ -24,48 +24,43 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Booking Confirmed!</title>
+      <title>Booking Confirmed</title>
       <style>
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; background: #f9fafb; }
         .container { max-width: 600px; margin: 0 auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; }
-        .header { background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); padding: 30px 20px; text-align: center; }
-        .header h1 { color: #1A1F2C; margin: 0; font-size: 24px; font-weight: 700; }
+        .header { background: linear-gradient(135deg, #1A1F2C 0%, #2d3344 100%); padding: 30px 20px; text-align: center; }
+        .header h1 { color: #C5A572; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+        .header p { color: #9CA3AF; margin: 6px 0 0 0; font-size: 13px; }
+        .gold-bar { height: 3px; background: linear-gradient(90deg, transparent, #C5A572, transparent); }
         .content { padding: 40px 30px; }
-        .ref-box { text-align: center; padding: 20px; background: #fef3c7; border-radius: 8px; margin-bottom: 25px; border: 1px solid #C5A572; }
-        .ref-label { margin: 0; color: #92400e; font-size: 13px; text-transform: uppercase; }
-        .ref-code { margin: 5px 0 0 0; color: #1f2937; font-size: 24px; font-weight: 800; letter-spacing: 1px; }
         .details { border: 1px solid #C5A572; border-radius: 8px; padding: 25px; margin: 25px 0; }
         .details h2 { color: #111827; margin: 0 0 20px 0; font-size: 20px; font-weight: 700; }
         .info { margin: 8px 0; color: #4b5563; font-size: 15px; }
         .info strong { color: #1f2937; font-weight: 600; }
         .divider { margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb; }
         .price { font-size: 20px; font-weight: 800; color: #C5A572; }
-        .next-steps { background: #fdfbf7; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #e7e5e4; }
-        .next-steps h3 { margin: 0 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 700; }
-        .next-steps ul { margin: 0; padding-left: 20px; color: #4b5563; }
-        .next-steps li { margin-bottom: 8px; }
-        .contact { text-align: center; margin-top: 30px; }
-        .contact p { color: #6b7280; font-size: 14px; margin: 5px 0; }
-        .contact a { color: #C5A572; text-decoration: none; font-weight: 600; }
-        .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; }
+        .footer { background: #1A1F2C; padding: 30px; text-align: center; color: #9CA3AF; font-size: 12px; }
+        .footer a { color: #C5A572; text-decoration: none; }
       </style>
     </head>
     <body>
       <div class="container">
         <div class="header">
-          <h1>Booking Confirmed! ✅</h1>
+          <h1>Booking Confirmed</h1>
+          <p>Your chauffeur experience is secured</p>
         </div>
+        <div class="gold-bar"></div>
 
         <div class="content">
           <p style="font-size: 18px; color: #1f2937; margin-bottom: 20px;">Dear ${quote.name},</p>
           
-          <p style="color: #4b5563; line-height: 1.6; margin-bottom: 25px;">
-            Great news — your booking has been confirmed! Our team is now preparing to deliver a premium chauffeur experience for you.
+          <p style="color: #4b5563; line-height: 1.7; margin-bottom: 25px;">
+            Excellent choice — your booking is confirmed. Our team is now preparing to deliver a premium chauffeur experience for you.
           </p>
 
-          <div class="ref-box">
-            <p class="ref-label">Booking Reference</p>
-            <p class="ref-code">#${quote.id.substring(0, 8).toUpperCase()}</p>
+          <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #1A1F2C 0%, #2d3344 100%); border-radius: 8px; margin-bottom: 25px;">
+            <p style="margin: 0; color: #9CA3AF; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px;">Booking Reference</p>
+            <p style="margin: 6px 0 0 0; color: #C5A572; font-size: 24px; font-weight: 800; letter-spacing: 1px;">#${quote.id.substring(0, 8).toUpperCase()}</p>
           </div>
 
           <div class="details">
@@ -87,25 +82,39 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
             </div>
           </div>
 
-          <div class="next-steps">
-            <h3>What Happens Next?</h3>
-            <ul>
-              <li>Our team will be in touch to finalise payment and any remaining details</li>
-              <li>We'll contact you 24 hours before your pickup to reconfirm</li>
-              <li>Your chauffeur will arrive 10 minutes before the scheduled time</li>
-              <li>You'll receive a reminder SMS on the day of your trip</li>
+          <!-- Your Experience Includes -->
+          <div style="background: linear-gradient(135deg, #fdfbf7 0%, #fef9f0 100%); border: 1px solid #C5A572; border-radius: 8px; padding: 25px; margin: 25px 0;">
+            <h3 style="margin: 0 0 15px 0; font-size: 16px; font-weight: 700; color: #1A1F2C;">Your Chauffeur Experience Includes</h3>
+            <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 14px; color: #4b5563;"><span style="flex-shrink: 0;">✅</span><span>Luxury ${quote.vehicle_name || 'vehicle'} — premium leather interior</span></div>
+            <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 14px; color: #4b5563;"><span style="flex-shrink: 0;">✅</span><span>Professional, suited chauffeur — background-checked and fully licensed</span></div>
+            <div style="display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; font-size: 14px; color: #4b5563;"><span style="flex-shrink: 0;">✅</span><span>Door-to-door service with complimentary wait time</span></div>
+            <div style="display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: #4b5563;"><span style="flex-shrink: 0;">✅</span><span>Fixed pricing — the quoted price is final, no hidden fees</span></div>
+          </div>
+
+          <div style="background: #f9fafb; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #e5e7eb;">
+            <h3 style="margin: 0 0 15px 0; color: #1f2937; font-size: 16px; font-weight: 700;">What Happens Next?</h3>
+            <ul style="margin: 0; padding-left: 20px; color: #4b5563;">
+              <li style="margin-bottom: 8px;">Our team will be in touch to finalise payment and any remaining details</li>
+              <li style="margin-bottom: 8px;">We'll contact you 24 hours before your pickup to reconfirm</li>
+              <li style="margin-bottom: 8px;">Your chauffeur will arrive 10 minutes before the scheduled time</li>
+              <li style="margin-bottom: 8px;">You'll receive a reminder SMS on the day of your trip</li>
             </ul>
           </div>
 
-          <div class="contact">
-            <p>Need to make changes?</p>
-            <p><a href="tel:+61430240945">+61 430 240 945</a></p>
-            <p><a href="mailto:bookings@chauffeurtop.com.au">bookings@chauffeurtop.com.au</a></p>
+          <!-- Referral -->
+          <div style="text-align: center; padding: 18px; background: #fefce8; border: 1px solid #fde68a; border-radius: 8px; margin: 25px 0;">
+            <p style="margin: 0; font-size: 14px; color: #92400e; font-weight: 600;">Love ChauffeurTop? Share with a friend!</p>
+            <p style="margin: 4px 0 0 0; font-size: 13px; color: #a16207;">They'll receive 10% off their first ride.</p>
+          </div>
+
+          <div style="text-align: center; margin-top: 25px;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0 0 5px 0;">Need to make changes?</p>
+            <p style="margin: 0;"><a href="tel:+61430240945" style="color: #C5A572; text-decoration: none; font-weight: 600;">+61 430 240 945</a> · <a href="mailto:bookings@chauffeurtop.com.au" style="color: #C5A572; text-decoration: none; font-weight: 600;">bookings@chauffeurtop.com.au</a></p>
           </div>
         </div>
 
         <div class="footer">
-          <p>&copy; ${new Date().getFullYear()} ChauffeurTop. All rights reserved.</p>
+          <p style="margin: 0;">&copy; ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
         </div>
       </div>
     </body>

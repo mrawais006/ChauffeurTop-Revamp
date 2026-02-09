@@ -39,7 +39,7 @@ export default function ThankYouPage() {
           Your quote request has been received successfully.
         </p>
         <p className="text-lg text-luxury-gold mb-8">
-          Our team will review your details and send you a personalised quote shortly.
+          You'll receive a personalised quote within 30 minutes during business hours.
         </p>
 
         {/* Decorative Line */}
@@ -47,6 +47,39 @@ export default function ThankYouPage() {
           <div className="h-px w-16 bg-luxury-gold/30"></div>
           <div className="w-2 h-2 bg-luxury-gold rounded-full mx-4"></div>
           <div className="h-px w-16 bg-luxury-gold/30"></div>
+        </div>
+
+        {/* Why You'll Love ChauffeurTop */}
+        <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 mb-8 border border-luxury-gold/20 text-left">
+          <p className="text-luxury-gold mb-4 text-sm uppercase tracking-wider font-bold text-center">
+            Why You'll Love ChauffeurTop
+          </p>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <span className="text-luxury-gold text-lg shrink-0">🚘</span>
+              <div>
+                <p className="text-white font-semibold text-sm">Luxury Fleet</p>
+                <p className="text-white/50 text-xs">Mercedes, BMW, and Audi vehicles — premium comfort on every ride.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-luxury-gold text-lg shrink-0">🔒</span>
+              <div>
+                <p className="text-white font-semibold text-sm">Fixed Pricing</p>
+                <p className="text-white/50 text-xs">No surge, no hidden fees. Your quoted price is final — often comparable to standard taxi fares.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-luxury-gold text-lg shrink-0">🎩</span>
+              <div>
+                <p className="text-white font-semibold text-sm">Professional Chauffeurs</p>
+                <p className="text-white/50 text-xs">Fully licensed, background-checked drivers. Not a random rideshare — a premium, reliable service.</p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-4 pt-4 border-t border-white/10 text-center">
+            <p className="text-white/40 text-xs">Trusted by 10,000+ Melbourne travellers · 4.9/5 on Google</p>
+          </div>
         </div>
 
         {/* Contact Info Card */}

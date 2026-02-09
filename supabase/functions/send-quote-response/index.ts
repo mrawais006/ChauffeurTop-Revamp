@@ -147,31 +147,40 @@ serve(async (req: Request) => {
   }
 });
 
-// Common Styles for Sleek Design
+// Common Styles for Premium Design
 const styles = `
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1f2937; margin: 0; padding: 0; background-color: #f9fafb; }
   .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 8px; overflow: hidden; }
-  .header { background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); padding: 30px 20px; text-align: center; }
-  .header h1 { color: #1A1F2C; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+  .header { background: linear-gradient(135deg, #1A1F2C 0%, #2d3344 100%); padding: 30px 20px; text-align: center; }
+  .header h1 { color: #C5A572; margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+  .header p { color: #9CA3AF; margin: 6px 0 0 0; font-size: 13px; }
+  .gold-bar { height: 3px; background: linear-gradient(90deg, transparent, #C5A572, transparent); }
   .content { padding: 40px 30px; }
   .greeting { font-size: 16px; color: #1f2937; margin-bottom: 20px; }
-  .intro { font-size: 15px; color: #4b5563; margin-bottom: 25px; line-height: 1.6; }
+  .intro { font-size: 15px; color: #4b5563; margin-bottom: 25px; line-height: 1.7; }
   
-  /* The Main Box */
   .details-container { border: 1px solid #C5A572; border-radius: 8px; padding: 25px; margin: 25px 0; background-color: #ffffff; }
   .details-title { color: #111827; margin: 0 0 20px 0; font-size: 20px; font-weight: 700; }
   
   .info-line { margin: 8px 0; color: #4b5563; font-size: 15px; }
   .info-label { font-weight: 600; color: #1f2937; }
   
-  /* Inner Boxes */
   .journey-box { background-color: #fdfbf7; border: 1px solid #e7e5e4; border-radius: 6px; padding: 20px; margin-top: 20px; }
   .journey-header { display: flex; align-items: center; gap: 8px; font-weight: 700; color: #1f2937; margin: 0 0 15px 0; font-size: 16px; }
   .journey-detail { margin: 6px 0; font-size: 14px; color: #4b5563; }
   .journey-label { font-weight: 600; color: #1f2937; min-width: 80px; display: inline-block; }
+
+  .value-section { background: linear-gradient(135deg, #fdfbf7 0%, #fef9f0 100%); border: 1px solid #C5A572; border-radius: 8px; padding: 25px; margin: 25px 0; }
+  .value-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 14px; color: #4b5563; }
+  .value-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .value-text strong { color: #1f2937; }
+  .trust-bar { text-align: center; padding: 12px; background: #f9fafb; border-radius: 6px; margin-top: 15px; }
+  .trust-bar span { font-size: 12px; color: #6b7280; }
+  .trust-bar strong { color: #C5A572; }
   
-  .footer { background: #f9fafb; padding: 30px; text-align: center; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; }
-  .cta-button { display: inline-block; background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); color: #1A1F2C; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 16px; margin: 20px 0; text-align: center; box-shadow: 0 4px 6px rgba(197, 165, 114, 0.3); }
+  .footer { background: #1A1F2C; padding: 30px; text-align: center; color: #9CA3AF; font-size: 12px; }
+  .footer a { color: #C5A572; text-decoration: none; }
+  .cta-button { display: inline-block; background: linear-gradient(135deg, #C5A572 0%, #D4B88C 100%); color: #1A1F2C; padding: 16px 32px; text-decoration: none; border-radius: 6px; font-weight: 700; font-size: 16px; margin: 20px 0; text-align: center; box-shadow: 0 4px 12px rgba(197, 165, 114, 0.35); letter-spacing: 0.5px; }
 `;
 
 function generateBookingReceivedEmail(quote: any): string {
@@ -208,8 +217,10 @@ function generateBookingReceivedEmail(quote: any): string {
       <body>
         <div class="container">
           <div class="header">
-            <h1>Quote Request Received - ChauffeurTop</h1>
+            <h1>ChauffeurTop</h1>
+            <p>Melbourne's Premium Chauffeur Service</p>
           </div>
+          <div class="gold-bar"></div>
           <div class="content">
             <p class="greeting">Dear ${quote.name},</p>
             <p class="intro">
@@ -217,28 +228,22 @@ function generateBookingReceivedEmail(quote: any): string {
             </p>
             
             <div class="details-container">
-              <h2 class="details-title">Your Request Details:</h2>
+              <h2 class="details-title">Your Request Details</h2>
               
               <p class="info-line"><span class="info-label">Date:</span> ${formattedDate}</p>
               <p class="info-line"><span class="info-label">Time:</span> ${quote.time} Melbourne local time (AEST/AEDT)</p>
               <p class="info-line"><span class="info-label">Pickup:</span> ${quote.pickup_location}</p>
               
-              <!-- Outbound Journey Box -->
               <div class="journey-box">
-                <div class="journey-header">
-                  <span>🚗</span> Outbound Journey
-                </div>
+                <div class="journey-header"><span>🚗</span> Outbound Journey</div>
                 <div class="journey-detail"><span class="journey-label">Destination:</span> ${destinationStr}</div>
                 <div class="journey-detail"><span class="journey-label">Date:</span> ${formattedDate}</div>
                 <div class="journey-detail"><span class="journey-label">Time:</span> ${quote.time}</div>
               </div>
 
               ${isReturnTrip && returnData ? `
-              <!-- Return Journey Box -->
               <div class="journey-box">
-                <div class="journey-header">
-                  <span>🔄</span> Return Journey
-                </div>
+                <div class="journey-header"><span>🔄</span> Return Journey</div>
                 <div class="journey-detail"><span class="journey-label">Pickup:</span> ${returnData.pickup}</div>
                 <div class="journey-detail"><span class="journey-label">Destination:</span> ${returnData.destination}</div>
                 <div class="journey-detail"><span class="journey-label">Date:</span> ${new Date(returnData.date).toLocaleDateString('en-AU')}</div>
@@ -249,18 +254,39 @@ function generateBookingReceivedEmail(quote: any): string {
               <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
                   <p class="info-line"><span class="info-label">Vehicle:</span> ${quote.vehicle_name || quote.vehicle_type}</p>
                   <p class="info-line"><span class="info-label">Passengers:</span> ${quote.passengers}</p>
-                  <p class="info-line"><span class="info-label">Service Area:</span> ${quote.city || 'Melbourne'}</p>
               </div>
-              
             </div>
 
-            <p style="text-align: center; color: #6b7280; font-size: 14px;">
-              We will review your request and send you a personalised quote with a confirmation link shortly.
+            <!-- Why ChauffeurTop -->
+            <div class="value-section">
+              <h3 style="margin: 0 0 15px 0; font-size: 16px; font-weight: 700; color: #1A1F2C;">Why ChauffeurTop?</h3>
+              <div class="value-item">
+                <span class="value-icon">🔒</span>
+                <span class="value-text"><strong>Fixed pricing, guaranteed</strong> — no surge, no hidden fees. Your quoted price is final.</span>
+              </div>
+              <div class="value-item">
+                <span class="value-icon">🎩</span>
+                <span class="value-text"><strong>Professional chauffeurs</strong> — fully licensed, background-checked drivers. Not a random rideshare.</span>
+              </div>
+              <div class="value-item">
+                <span class="value-icon">🚘</span>
+                <span class="value-text"><strong>Luxury fleet</strong> — Mercedes, BMW, and Audi vehicles. Premium comfort at competitive rates.</span>
+              </div>
+              <div class="trust-bar">
+                <span>Trusted by <strong>10,000+ Melbourne travellers</strong> · <strong>4.9/5</strong> on Google</span>
+              </div>
+            </div>
+
+            <p style="text-align: center; color: #6b7280; font-size: 14px; margin-top: 25px;">
+              We will review your request and send you a personalised quote shortly.
             </p>
 
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
+            <p style="margin: 0 0 8px 0;">
+              <a href="tel:+61430240945">+61 430 240 945</a> · <a href="mailto:bookings@chauffeurtop.com.au">bookings@chauffeurtop.com.au</a>
+            </p>
+            <p style="margin: 0;">&copy; ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -298,26 +324,56 @@ function generateQuoteResponseEmail(quote: any, priceBreakdown: any, type: strin
       <body>
         <div class="container">
           <div class="header">
-            <h1>Your Quote is Ready!</h1>
+            <h1>Your Personalised Quote</h1>
+            <p>ChauffeurTop Melbourne</p>
           </div>
+          <div class="gold-bar"></div>
           <div class="content">
             <p class="greeting">Dear ${quote.name},</p>
             <p class="intro">
-              Thank you for choosing ChauffeurTop. We have prepared your personalised quote below. If you're happy with the price, simply click the button to confirm your booking.
+              Great news — your personalised quote is ready. Review the details below and confirm to secure your chauffeur.
             </p>
 
-             <div class="details-container">
-              <h2 class="details-title">Your Quote Details:</h2>
-              
-              <div style="text-align: center; padding: 20px; background: #fef3c7; border-radius: 8px; margin-bottom: 20px;">
-                <span style="font-size: 14px; color: #92400e; text-transform: uppercase; font-weight: bold;">Quoted Price</span>
-                <div style="font-size: 32px; font-weight: 800; color: #b45309;">$${totalAmount.toFixed(2)}</div>
-              </div>
+            <!-- Price Box -->
+            <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #1A1F2C 0%, #2d3344 100%); border-radius: 8px; margin-bottom: 25px;">
+              <span style="font-size: 12px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Your Quoted Price</span>
+              <div style="font-size: 40px; font-weight: 800; color: #C5A572; margin: 8px 0 4px 0;">$${totalAmount.toFixed(2)}</div>
+              <span style="font-size: 12px; color: #6B7280;">Fixed price — no surge, no hidden fees</span>
+            </div>
 
+            <!-- What's Included -->
+            <div class="value-section" style="margin-bottom: 20px;">
+              <h3 style="margin: 0 0 15px 0; font-size: 15px; font-weight: 700; color: #1A1F2C;">What's Included</h3>
+              <div class="value-item">
+                <span class="value-icon">🎩</span>
+                <span class="value-text"><strong>Professional chauffeur</strong> — licensed, background-checked, and suited</span>
+              </div>
+              <div class="value-item">
+                <span class="value-icon">🚘</span>
+                <span class="value-text"><strong>Luxury ${quote.vehicle_name || quote.vehicle_type || 'vehicle'}</strong> — premium leather interior, climate controlled</span>
+              </div>
+              <div class="value-item">
+                <span class="value-icon">🔒</span>
+                <span class="value-text"><strong>Fixed pricing</strong> — the price above is final. No surprises, ever.</span>
+              </div>
+              <div class="value-item">
+                <span class="value-icon">🚪</span>
+                <span class="value-text"><strong>Door-to-door service</strong> — picked up and dropped off exactly where you need</span>
+              </div>
+              ${quote.service_type && quote.service_type.toLowerCase().includes('airport') ? `
+              <div class="value-item">
+                <span class="value-icon">✈️</span>
+                <span class="value-text"><strong>Flight tracking + 60 min free wait</strong> — we monitor your flight so you never wait</span>
+              </div>` : ''}
+            </div>
+
+            <!-- Trip Details -->
+            <div class="details-container">
+              <h2 class="details-title">Trip Details</h2>
+              
               <p class="info-line"><span class="info-label">Date:</span> ${formattedDate}</p>
               <p class="info-line"><span class="info-label">Time:</span> ${quote.time}</p>
               
-               <!-- Outbound Journey Box -->
               <div class="journey-box">
                 <div class="journey-header"><span>🚗</span> Outbound Journey</div>
                 <div class="journey-detail"><span class="journey-label">Pickup:</span> ${quote.pickup_location}</div>
@@ -325,7 +381,6 @@ function generateQuoteResponseEmail(quote: any, priceBreakdown: any, type: strin
               </div>
 
               ${isReturnTrip && returnData ? `
-              <!-- Return Journey Box -->
               <div class="journey-box">
                 <div class="journey-header"><span>🔄</span> Return Journey</div>
                 <div class="journey-detail"><span class="journey-label">Pickup:</span> ${returnData.pickup}</div>
@@ -335,23 +390,36 @@ function generateQuoteResponseEmail(quote: any, priceBreakdown: any, type: strin
               </div>
               ` : ''}
               
-              <div style="margin-top: 20px;">
+              <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
                  <p class="info-line"><span class="info-label">Vehicle:</span> ${quote.vehicle_name || quote.vehicle_type}</p>
                  <p class="info-line"><span class="info-label">Passengers:</span> ${quote.passengers}</p>
               </div>
-
             </div>
 
-            <div style="text-align: center;">
-              <a href="${confirmationLink}" class="cta-button">✓ Confirm Booking Now</a>
+            <!-- CTA -->
+            <div style="text-align: center; margin: 30px 0 15px 0;">
+              <a href="${confirmationLink}" class="cta-button">Confirm & Secure Your Chauffeur</a>
+            </div>
+            
+            <p style="text-align: center; font-size: 12px; color: #9CA3AF; margin-bottom: 25px;">
+              This quote is valid for 48 hours. Confirm now to lock in your booking.
+            </p>
+
+            <!-- Social Proof -->
+            <div style="text-align: center; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 4px 0; font-size: 13px; color: #6b7280; font-style: italic;">"Exceptional service. Professional driver, immaculate car, and the price was less than a taxi. Highly recommend."</p>
+              <p style="margin: 0; font-size: 12px; color: #C5A572; font-weight: 600;">— Google Review · 4.9/5 from 10,000+ travellers</p>
             </div>
             
             <p style="text-align: center; font-size: 14px; color: #6b7280; margin-top: 20px;">
-               Need to discuss? <a href="mailto:bookings@chauffeurtop.com.au" style="color: #C5A572;">Contact Us</a>
+               Questions? <a href="tel:+61430240945" style="color: #C5A572; font-weight: 600;">Call us</a> or <a href="mailto:bookings@chauffeurtop.com.au" style="color: #C5A572; font-weight: 600;">email us</a>
             </p>
           </div>
           <div class="footer">
-            <p>&copy; ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
+            <p style="margin: 0 0 8px 0;">
+              <a href="tel:+61430240945">+61 430 240 945</a> · <a href="mailto:bookings@chauffeurtop.com.au">bookings@chauffeurtop.com.au</a>
+            </p>
+            <p style="margin: 0;">&copy; ${new Date().getFullYear()} ChauffeurTop Melbourne. All rights reserved.</p>
           </div>
         </div>
       </body>

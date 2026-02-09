@@ -234,7 +234,7 @@ export default function ConfirmBookingPage() {
                         </div>
 
                         {/* Trip Details */}
-                        <div className="space-y-4 mb-8">
+                        <div className="space-y-4 mb-6">
                             <h2 className="text-luxury-gold font-serif font-bold text-sm uppercase tracking-wider">
                                 Trip Details
                             </h2>
@@ -290,13 +290,39 @@ export default function ConfirmBookingPage() {
                             </div>
                         </div>
 
+                        {/* What You're Getting */}
+                        <div className="mb-6 p-4 bg-white/5 border border-luxury-gold/20 rounded-lg">
+                            <h3 className="text-luxury-gold font-serif font-bold text-xs uppercase tracking-wider mb-3">
+                                What You're Getting
+                            </h3>
+                            <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-luxury-gold text-xs">🚘</span>
+                                    <span className="text-white/70 text-xs">Luxury {quote.vehicle_name || 'vehicle'} — premium leather interior</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-luxury-gold text-xs">🎩</span>
+                                    <span className="text-white/70 text-xs">Professional chauffeur — licensed & background-checked</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-luxury-gold text-xs">🔒</span>
+                                    <span className="text-white/70 text-xs">Fixed pricing — no surge, no hidden fees</span>
+                                </div>
+                            </div>
+                        </div>
+
                         {/* Confirm Button */}
                         <button
                             onClick={handleConfirm}
-                            className="w-full bg-luxury-gold text-luxury-black hover:bg-white hover:text-black font-bold uppercase tracking-widest py-5 px-6 rounded-sm transition-all duration-300 shadow-lg hover:shadow-xl text-sm mb-4"
+                            className="w-full bg-luxury-gold text-luxury-black hover:bg-white hover:text-black font-bold uppercase tracking-widest py-5 px-6 rounded-sm transition-all duration-300 shadow-lg hover:shadow-xl text-sm mb-3"
                         >
-                            ✓ Confirm Booking
+                            Confirm & Secure Your Chauffeur
                         </button>
+
+                        {/* Trust Signal */}
+                        <p className="text-center text-white/30 text-[11px] mb-4">
+                            Trusted by 10,000+ Melbourne travellers · 4.9/5 on Google
+                        </p>
 
                         <p className="text-center text-white/40 text-xs">
                             By confirming, you agree to the quoted price and our service terms. Our team will be in touch to arrange payment.
@@ -343,7 +369,7 @@ export default function ConfirmBookingPage() {
                     <p className="text-luxury-gold/70 font-serif text-sm">
                         {pageState === 'already_confirmed'
                             ? 'This booking has already been confirmed. You should have received a confirmation email with your details.'
-                            : 'Thank you for confirming your booking with ChauffeurTop! Our team will be in touch to finalise payment and details.'
+                            : 'Excellent choice — your chauffeur experience is secured. Our team will be in touch to finalise payment and details.'
                         }
                     </p>
                 </div>
@@ -358,6 +384,29 @@ export default function ConfirmBookingPage() {
                             }
                         </p>
                     </div>
+
+                    {/* What's Next */}
+                    {pageState === 'success' && (
+                        <div className="bg-white/5 border border-luxury-gold/20 rounded-lg p-5 mb-6">
+                            <h3 className="text-luxury-gold font-serif font-bold text-xs uppercase tracking-wider mb-3 text-center">
+                                What Happens Next
+                            </h3>
+                            <div className="space-y-2 text-white/60 text-xs">
+                                <p>1. Our team will contact you to finalise payment</p>
+                                <p>2. We'll reconfirm 24 hours before your pickup</p>
+                                <p>3. Your chauffeur will arrive 10 minutes early</p>
+                                <p>4. You'll receive a reminder SMS on the day</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Referral */}
+                    {pageState === 'success' && (
+                        <div className="bg-luxury-gold/10 border border-luxury-gold/20 rounded-lg p-4 mb-6 text-center">
+                            <p className="text-luxury-gold text-sm font-bold mb-1">Love ChauffeurTop? Share with a friend!</p>
+                            <p className="text-white/50 text-xs">They'll receive 10% off their first ride.</p>
+                        </div>
+                    )}
 
                     {/* Contact Information */}
                     <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-8">
@@ -388,7 +437,7 @@ export default function ConfirmBookingPage() {
 
                     <div className="mt-6 text-center">
                         <p className="text-xs text-white/50 font-serif">
-                            ChauffeurTop Melbourne - Premium Chauffeur Services
+                            ChauffeurTop Melbourne · Premium Chauffeur Services
                         </p>
                     </div>
                 </div>
