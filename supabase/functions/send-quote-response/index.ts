@@ -299,6 +299,12 @@ function generateQuoteResponseEmail(quote: any, priceBreakdown: any, type: strin
   const confirmationLink = `${SITE_URL}/confirm-booking/${confirmationToken}`;
   const formattedDate = new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const totalAmount = priceBreakdown?.total || quote.quoted_price || 0;
+  const hasDiscount = priceBreakdown?.discount && priceBreakdown.discount.amount > 0;
+  const discountText = hasDiscount
+    ? (priceBreakdown.discount.type === 'percentage'
+      ? `${priceBreakdown.discount.value}%`
+      : `$${priceBreakdown.discount.amount.toFixed(2)}`)
+    : '';
 
    // Parse destinations logic
   let isReturnTrip = false;
@@ -334,12 +340,30 @@ function generateQuoteResponseEmail(quote: any, priceBreakdown: any, type: strin
               Great news — your personalised quote is ready. Review the details below and confirm to secure your chauffeur.
             </p>
 
-            <!-- Price Box -->
+            ${priceBreakdown?.notes ? `
+            <!-- Personal Message from Admin -->
+            <div style="background-color: #fdfbf7; padding: 20px 25px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #C5A572; color: #4b5563; font-size: 15px; line-height: 1.7;">
+              ${priceBreakdown.notes}
+            </div>
+            ` : ''}
+
+            ${hasDiscount ? `
+            <!-- Discounted Price Box -->
+            <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #1A1F2C 0%, #2d3344 100%); border-radius: 8px; margin-bottom: 25px;">
+              <span style="font-size: 12px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Original Price</span>
+              <div style="font-size: 20px; text-decoration: line-through; color: #6B7280; margin: 4px 0 12px 0;">$${priceBreakdown.subtotal.toFixed(2)}</div>
+              <span style="font-size: 12px; color: #ffffff; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Your Exclusive Price</span>
+              <div style="font-size: 40px; font-weight: 800; color: #C5A572; margin: 8px 0 8px 0;">$${totalAmount.toFixed(2)}</div>
+              <div style="margin-top: 8px; color: #10B981; font-weight: 600; background: rgba(16, 185, 129, 0.15); display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 14px;">You save $${priceBreakdown.discount.amount.toFixed(2)} (${discountText} off)</div>
+            </div>
+            ` : `
+            <!-- Regular Price Box -->
             <div style="text-align: center; padding: 25px; background: linear-gradient(135deg, #1A1F2C 0%, #2d3344 100%); border-radius: 8px; margin-bottom: 25px;">
               <span style="font-size: 12px; color: #9CA3AF; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Your Quoted Price</span>
               <div style="font-size: 40px; font-weight: 800; color: #C5A572; margin: 8px 0 4px 0;">$${totalAmount.toFixed(2)}</div>
               <span style="font-size: 12px; color: #6B7280;">Fixed price — no surge, no hidden fees</span>
             </div>
+            `}
 
             <!-- What's Included -->
             <div class="value-section" style="margin-bottom: 20px;">

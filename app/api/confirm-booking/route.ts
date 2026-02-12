@@ -4,10 +4,28 @@ import { supabaseAdmin } from '@/lib/supabase';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://chauffeurtop.com.au';
 const ADMIN_EMAIL = 'admin@chauffeurtop.com.au';
 
+// Parse return trip data from destinations field
+function parseReturnTrip(destinations: any): { isReturnTrip: boolean; returnData: any; destinationStr: string } {
+    let isReturnTrip = false;
+    let returnData: any = null;
+    let destinationsList = destinations;
+
+    if (destinations && typeof destinations === 'object' && !Array.isArray(destinations) && destinations.type === 'return_trip') {
+        isReturnTrip = true;
+        returnData = destinations.return;
+        destinationsList = destinations.outbound?.destinations;
+    } else if (Array.isArray(destinations)) {
+        destinationsList = destinations;
+    }
+
+    const destinationStr = Array.isArray(destinationsList) ? destinationsList.join(', ') : (destinationsList || 'As instructed');
+    return { isReturnTrip, returnData, destinationStr };
+}
+
 // Direct Resend API call for customer confirmation email
 async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    
+
     if (!RESEND_API_KEY) {
         console.error('[Customer Confirmation] Missing RESEND_API_KEY');
         return false;
@@ -17,6 +35,9 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
         console.error('[Customer Confirmation] No customer email address');
         return false;
     }
+
+    const { isReturnTrip, returnData, destinationStr } = parseReturnTrip(quote.destinations);
+    const formattedDate = new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -39,6 +60,10 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
         .info strong { color: #1f2937; font-weight: 600; }
         .divider { margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb; }
         .price { font-size: 20px; font-weight: 800; color: #C5A572; }
+        .journey-box { background-color: #fdfbf7; border: 1px solid #e7e5e4; border-radius: 6px; padding: 16px; margin-top: 16px; }
+        .journey-header { font-weight: 700; color: #1f2937; margin: 0 0 12px 0; font-size: 15px; }
+        .journey-detail { margin: 4px 0; font-size: 14px; color: #4b5563; }
+        .journey-label { font-weight: 600; color: #1f2937; min-width: 80px; display: inline-block; }
         .footer { background: #1A1F2C; padding: 30px; text-align: center; color: #9CA3AF; font-size: 12px; }
         .footer a { color: #C5A572; text-decoration: none; }
       </style>
@@ -53,7 +78,7 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
 
         <div class="content">
           <p style="font-size: 18px; color: #1f2937; margin-bottom: 20px;">Dear ${quote.name},</p>
-          
+
           <p style="color: #4b5563; line-height: 1.7; margin-bottom: 25px;">
             Excellent choice — your booking is confirmed. Our team is now preparing to deliver a premium chauffeur experience for you.
           </p>
@@ -65,17 +90,30 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
 
           <div class="details">
             <h2>Your Trip Details</h2>
-            
-            <p class="info"><strong>Date:</strong> ${new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            <p class="info"><strong>Time:</strong> ${quote.time}</p>
-            <p class="info"><strong>Pickup:</strong> ${quote.pickup_location}</p>
-            <p class="info"><strong>Destination:</strong> ${quote.destinations?.[0] || quote.dropoff_location || 'As instructed'}</p>
-            
+
+            <div class="journey-box">
+              <div class="journey-header">${isReturnTrip ? '🚗 Outbound Journey' : '🚗 Your Journey'}</div>
+              <p class="journey-detail"><span class="journey-label">Date:</span> ${formattedDate}</p>
+              <p class="journey-detail"><span class="journey-label">Time:</span> ${quote.time}</p>
+              <p class="journey-detail"><span class="journey-label">Pickup:</span> ${quote.pickup_location}</p>
+              <p class="journey-detail"><span class="journey-label">Destination:</span> ${destinationStr}</p>
+            </div>
+
+            ${isReturnTrip && returnData ? `
+            <div class="journey-box">
+              <div class="journey-header">🔄 Return Journey</div>
+              <p class="journey-detail"><span class="journey-label">Date:</span> ${returnData.date ? new Date(returnData.date).toLocaleDateString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : formattedDate}</p>
+              <p class="journey-detail"><span class="journey-label">Time:</span> ${returnData.time || 'TBC'}</p>
+              <p class="journey-detail"><span class="journey-label">Pickup:</span> ${returnData.pickup || destinationStr}</p>
+              <p class="journey-detail"><span class="journey-label">Destination:</span> ${returnData.destination || quote.pickup_location}</p>
+            </div>
+            ` : ''}
+
             <div class="divider">
                <p class="info"><strong>Vehicle:</strong> ${quote.vehicle_name || quote.vehicle_type}</p>
                <p class="info"><strong>Passengers:</strong> ${quote.passengers}</p>
             </div>
-            
+
             <div class="divider" style="display: flex; justify-content: space-between; align-items: center;">
                <strong style="font-size: 16px;">Total Payable</strong>
                <span class="price">$${(quote.quoted_price || 0).toFixed(2)}</span>
@@ -154,11 +192,13 @@ async function sendCustomerConfirmationDirect(quote: any): Promise<boolean> {
 // Direct Resend API call for admin notification
 async function sendAdminNotificationDirect(quote: any): Promise<boolean> {
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    
+
     if (!RESEND_API_KEY) {
         console.error('[Admin Notification] Missing RESEND_API_KEY');
         return false;
     }
+
+    const { isReturnTrip, returnData, destinationStr } = parseReturnTrip(quote.destinations);
 
     const emailHtml = `
     <!DOCTYPE html>
@@ -186,31 +226,42 @@ async function sendAdminNotificationDirect(quote: any): Promise<boolean> {
     <body>
       <div class="container">
         <div class="header">
-          <h1>🔔 Booking Confirmed!</h1>
+          <h1>${isReturnTrip ? '🔔 Return Booking Confirmed!' : '🔔 Booking Confirmed!'}</h1>
         </div>
         <div class="content">
           <div style="text-align: center;">
             <span class="ref">REF: #${quote.id.substring(0, 8).toUpperCase()}</span>
           </div>
-          
+
           <div class="section" style="background: #fdfbf7;">
             <h3>👤 Customer Details</h3>
             <p class="info"><strong>Name:</strong> ${quote.name}</p>
             <p class="info"><strong>Email:</strong> <a href="mailto:${quote.email}">${quote.email}</a></p>
             <p class="info"><strong>Phone:</strong> <a href="tel:${quote.phone}">${quote.phone}</a></p>
           </div>
-          
+
           <div class="section">
-            <h3>🚗 Trip Information</h3>
+            <h3>🚗 ${isReturnTrip ? 'Outbound Trip' : 'Trip Information'}</h3>
             <p class="info"><strong>Date:</strong> ${new Date(quote.date).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</p>
             <p class="info"><strong>Time:</strong> ${quote.time}</p>
             <p class="info"><strong>Pickup:</strong> ${quote.pickup_location}</p>
-            <p class="info"><strong>Dropoff:</strong> ${quote.dropoff_location || quote.destinations?.[0] || 'As discussed'}</p>
+            <p class="info"><strong>Dropoff:</strong> ${destinationStr}</p>
             <p class="info"><strong>Vehicle:</strong> ${quote.vehicle_name || quote.vehicle_type}</p>
             <p class="info"><strong>Passengers:</strong> ${quote.passengers}</p>
-            <div class="price">$${(quote.quoted_price || 0).toFixed(2)}</div>
           </div>
-          
+
+          ${isReturnTrip && returnData ? `
+          <div class="section" style="background: #f0f9ff;">
+            <h3>🔄 Return Trip</h3>
+            <p class="info"><strong>Date:</strong> ${returnData.date ? new Date(returnData.date).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) : 'Same day'}</p>
+            <p class="info"><strong>Time:</strong> ${returnData.time || 'TBC'}</p>
+            <p class="info"><strong>Pickup:</strong> ${returnData.pickup || destinationStr}</p>
+            <p class="info"><strong>Dropoff:</strong> ${returnData.destination || quote.pickup_location}</p>
+          </div>
+          ` : ''}
+
+          <div class="price">$${(quote.quoted_price || 0).toFixed(2)}</div>
+
           <div style="text-align: center; margin-top: 25px;">
             <a href="${SITE_URL}/admin" class="cta">VIEW IN ADMIN PANEL</a>
           </div>
@@ -354,29 +405,31 @@ export async function POST(request: NextRequest) {
         })).then(() => console.log('[Confirm Booking] Activity logged'))
           .catch(e => console.error('[Confirm Booking] Activity log error:', e));
 
-        // Customer email
-        sendCustomerConfirmationDirect(quote)
-            .then(success => {
-                if (!success) {
-                    console.log('[Confirm Booking] Trying Edge Function fallback for customer email...');
-                    return supabase.functions.invoke('send-confirmation-email', {
-                        body: { quote: quote, type: 'customer' }
-                    });
-                }
-            })
-            .catch(e => console.error('[Confirm Booking] Customer email error:', e));
+        // Send customer and admin emails (awaited to prevent Vercel from killing the function)
+        const [customerEmailSent, adminEmailSent] = await Promise.all([
+            sendCustomerConfirmationDirect(quote).catch(e => {
+                console.error('[Confirm Booking] Customer email error:', e);
+                return false;
+            }),
+            sendAdminNotificationDirect(quote).catch(e => {
+                console.error('[Confirm Booking] Admin email error:', e);
+                return false;
+            }),
+        ]);
 
-        // Admin email
-        sendAdminNotificationDirect(quote)
-            .then(success => {
-                if (!success) {
-                    console.log('[Confirm Booking] Trying Edge Function fallback for admin email...');
-                    return supabase.functions.invoke('send-confirmation-email', {
-                        body: { quote: quote, type: 'admin' }
-                    });
-                }
-            })
-            .catch(e => console.error('[Confirm Booking] Admin email error:', e));
+        // Fallback to edge functions if direct send failed
+        if (!customerEmailSent) {
+            console.log('[Confirm Booking] Trying Edge Function fallback for customer email...');
+            await supabase.functions.invoke('send-confirmation-email', {
+                body: { quote: quote, type: 'customer' }
+            }).catch(e => console.error('[Confirm Booking] Customer email fallback error:', e));
+        }
+        if (!adminEmailSent) {
+            console.log('[Confirm Booking] Trying Edge Function fallback for admin email...');
+            await supabase.functions.invoke('send-confirmation-email', {
+                body: { quote: quote, type: 'admin' }
+            }).catch(e => console.error('[Confirm Booking] Admin email fallback error:', e));
+        }
 
         // SMS Confirmation via Twilio (fire-and-forget)
         const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
